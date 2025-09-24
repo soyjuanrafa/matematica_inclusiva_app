@@ -12,6 +12,7 @@ import LessonSelectionScreen from '../screens/LessonSelectionScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import AccessibilitySettingsScreen from '../screens/AccessibilitySettingsScreen';
 import RewardsScreen from '../screens/RewardsScreen';
+import CharacterScreen from '../screens/CharacterScreen';
 
 // Crear navegadores
 const Stack = createStackNavigator();
@@ -90,6 +91,7 @@ const AppNavigator = () => {
         <Stack.Screen name="LessonCompletion" component={LessonCompletionScreen} />
         <Stack.Screen name="AccessibilitySettings" component={AccessibilitySettingsScreen} />
         <Stack.Screen name="Rewards" component={RewardsScreen} />
+        <Stack.Screen name="Character" component={CharacterScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
