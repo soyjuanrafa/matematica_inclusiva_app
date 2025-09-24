@@ -2,6 +2,8 @@ import React, { useEffect, useRef } from 'react';
 import { StatusBar, LogBox } from 'react-native';
 import { UserProgressProvider } from './src/context/UserProgressContext';
 import AppNavigator from './src/navigation/AppNavigator';
+import { AuthProvider, useAuth } from './src/context/AuthContext';
+import LoginScreen from './src/screens/LoginScreen';
 import * as Notifications from 'expo-notifications';
 import { NotificationService } from './src/utils/notificationService';
 import { SoundService } from './src/utils/soundService';
@@ -9,14 +11,7 @@ import { SoundService } from './src/utils/soundService';
 // Ignorar advertencias específicas si es necesario
 LogBox.ignoreLogs(['Reanimated 2']);
 
-// Configurar el comportamiento de las notificaciones cuando la app está en primer plano
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-  }),
-});
+// Notification handler is configured in notificationService.js
 
 export default function App() {
   const notificationListener = useRef();
@@ -41,8 +36,16 @@ export default function App() {
 
     // Limpiar listeners al desmontar
     return () => {
-      Notifications.removeNotificationSubscription(notificationListener.current);
-      Notifications.removeNotificationSubscription(responseListener.current);
+      try {
+        if (notificationListener.current) {
+          Notifications.removeNotificationSubscription(notificationListener.current);
+        }
+        if (responseListener.current) {
+          Notifications.removeNotificationSubscription(responseListener.current);
+        }
+      } catch (e) {
+        // ignore cleanup errors
+      }
     };
   }, []);
 
@@ -61,9 +64,19 @@ export default function App() {
   }, []);
 
   return (
-    <UserProgressProvider>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-      <AppNavigator />
-    </UserProgressProvider>
+    <AuthProvider>
+      <UserProgressProvider>
+        <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+        <MainApp />
+      </UserProgressProvider>
+    </AuthProvider>
   );
 }
+
+const MainApp = () => {
+  const { user, loading } = useAuth();
+
+  if (loading) return null;
+
+  return user ? <AppNavigator /> : <LoginScreen />;
+};

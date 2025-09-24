@@ -11,10 +11,12 @@ import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useUserProgress } from '../context/UserProgressContext';
 import AccessibleButton from '../components/AccessibleButton';
+import { useAuth } from '../context/AuthContext';
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
   const { progress, accessibilitySettings } = useUserProgress();
+  const { signOut } = useAuth();
   
   const handleAccessibilityPress = () => {
     navigation.navigate('AccessibilitySettings');
@@ -83,6 +85,11 @@ const ProfileScreen = () => {
           <Text style={styles.menuItemText}>Opciones de accesibilidad</Text>
           <Ionicons name="chevron-forward" size={24} color="#6200EE" />
         </TouchableOpacity>
+        <AccessibleButton
+          title="Cerrar sesión"
+          onPress={() => signOut()}
+          style={{ marginTop: 10, backgroundColor: '#E53935' }}
+        />
       </View>
       
       <View style={styles.section}>
