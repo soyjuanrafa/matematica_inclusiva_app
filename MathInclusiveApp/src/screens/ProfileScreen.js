@@ -5,7 +5,9 @@ import {
   StyleSheet,
   Image,
   ScrollView,
-  TouchableOpacity
+  TouchableOpacity,
+  Pressable,
+  Dimensions
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -17,108 +19,106 @@ const ProfileScreen = () => {
   const navigation = useNavigation();
   const { progress, accessibilitySettings } = useUserProgress();
   const { signOut } = useAuth();
-  
+
   const handleAccessibilityPress = () => {
     navigation.navigate('AccessibilitySettings');
   };
-  
+
   const handleRewardsPress = () => {
     navigation.navigate('Rewards');
   };
-  
+
+  const handleLogout = async () => {
+    await signOut();
+  };
+
+  const percent = Math.min(100, Math.max(0, progress?.progressPercent ?? 50));
+  const screenW = Dimensions.get('window').width;
+
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Mi Perfil - Cuenta Conmigo</Text>
-      </View>
-      
-      <View style={styles.profileSection}>
-        <Image 
-          source={require('../../assets/avatar-placeholder.png')} 
-          style={styles.profileImage}
-          accessibilityLabel="Imagen de perfil"
-        />
-        <Text style={styles.profileName}>Estudiante</Text>
-        <View style={styles.levelBadge}>
-          <Text style={styles.levelText}>Nivel {progress?.level || 1}</Text>
-        </View>
-      </View>
-      
-      <View style={styles.statsContainer}>
-        <View style={styles.statItem}>
-          <Text style={styles.statValue}>{progress?.points || 0}</Text>
-          <Text style={styles.statLabel}>Puntos</Text>
-        </View>
-        <View style={styles.statItem}>
-          <Text style={styles.statValue}>{progress?.lessonsCompleted || 0}</Text>
-          <Text style={styles.statLabel}>Lecciones</Text>
-        </View>
-        <View style={styles.statItem}>
-          <Text style={styles.statValue}>{progress?.streak || 0}</Text>
-          <Text style={styles.statLabel}>Racha</Text>
-        </View>
-      </View>
-      
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Mis logros</Text>
-        
-        <TouchableOpacity 
-          style={styles.menuItem}
-          onPress={handleRewardsPress}
-          accessibilityLabel="Ver mis logros"
-        >
-          <Ionicons name="trophy" size={24} color="#6200EE" />
-          <Text style={styles.menuItemText}>Ver todos mis logros</Text>
-          <Ionicons name="chevron-forward" size={24} color="#6200EE" />
-        </TouchableOpacity>
-      </View>
-      
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Configuración</Text>
-        
-        <TouchableOpacity 
-          style={styles.menuItem}
-          onPress={handleAccessibilityPress}
-          accessibilityLabel="Configurar opciones de accesibilidad"
-        >
-          <Ionicons name="accessibility" size={24} color="#6200EE" />
-          <Text style={styles.menuItemText}>Opciones de accesibilidad</Text>
-          <Ionicons name="chevron-forward" size={24} color="#6200EE" />
-        </TouchableOpacity>
-        <AccessibleButton
-          title="Cerrar sesión"
-          onPress={() => signOut()}
-          style={{ marginTop: 10, backgroundColor: '#E53935' }}
-        />
-      </View>
-      
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Estadísticas</Text>
-        
-        <View style={styles.statsGrid}>
-          <View style={styles.statBox}>
-            <Ionicons name="checkmark-circle" size={24} color="#4CAF50" />
-            <Text style={styles.statBoxValue}>{progress?.lessonsCompleted || 0}</Text>
-            <Text style={styles.statBoxLabel}>Lecciones completadas</Text>
+    <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.cardContainer}>
+        <View style={styles.profile}>
+          <Image
+            source={require('../../assets/avatar-placeholder.png')}
+            style={styles.avatar}
+            accessibilityLabel="Imagen de perfil"
+          />
+          <Text style={styles.username}>{progress?.userName || 'Estudiante'}</Text>
+          <Text style={styles.level}>Nivel {progress?.level || 1}</Text>
+
+          <View style={styles.progress} accessibilityLabel="Barra de progreso">
+            <View style={[styles.progressBar, { width: `${percent}%` }]} />
           </View>
-          
-          <View style={styles.statBox}>
-            <Ionicons name="star" size={24} color="#FFC107" />
-            <Text style={styles.statBoxValue}>{progress?.averageScore || 0}%</Text>
-            <Text style={styles.statBoxLabel}>Puntuación media</Text>
-          </View>
-          
-          <View style={styles.statBox}>
-            <Ionicons name="flame" size={24} color="#FF5722" />
-            <Text style={styles.statBoxValue}>{progress?.streak || 0}</Text>
-            <Text style={styles.statBoxLabel}>Racha actual</Text>
-          </View>
-          
-          <View style={styles.statBox}>
-            <Ionicons name="time" size={24} color="#2196F3" />
-            <Text style={styles.statBoxValue}>{progress?.totalTimeMinutes || 0}</Text>
-            <Text style={styles.statBoxLabel}>Minutos de estudio</Text>
-          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Ajustes Generales</Text>
+          <TouchableOpacity style={styles.card} onPress={() => {}}>
+            <Text>Idioma</Text>
+            <Text style={styles.cardRight}>Español</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.card} onPress={() => {}}>
+            <Text>Notificaciones</Text>
+            <Text style={styles.cardRight}>Activar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.card} onPress={() => {}}>
+            <Text>Sonido y música</Text>
+            <Text style={styles.cardRight}>Ajustar</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={[styles.section, styles.highlight]}>
+          <Text style={styles.sectionTitle}>Aprendizaje</Text>
+          <TouchableOpacity style={styles.card} onPress={() => {}}>
+            <Text>Nivel de Dificultad</Text>
+            <Text style={styles.cardRight}>Fácil</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.card} onPress={() => {}}>
+            <Text>Recompensas Visuales</Text>
+            <Text style={styles.cardRight}>Confeti</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Accesibilidad</Text>
+          <TouchableOpacity style={styles.card} onPress={handleAccessibilityPress}>
+            <Text>Audio Descriptivo</Text>
+            <Text style={styles.cardRight}>Activar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.card} onPress={() => {}}>
+            <Text>Lengua de Señas LSN</Text>
+            <Text style={styles.cardRight}>Mostrar intérprete</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.card} onPress={() => {}}>
+            <Text>Modo de Alto Contraste</Text>
+            <Text style={styles.cardRight}>Activado</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.card} onPress={() => {}}>
+            <Text>Subtítulos</Text>
+            <Text style={styles.cardRight}>Activar</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.sectionHelp}>
+          <Text style={styles.sectionTitle}>Ayuda</Text>
+          <TouchableOpacity style={styles.card} onPress={() => {}}>
+            <Text>Tutorial</Text>
+            <Text style={styles.cardRight}>Aprender</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.card} onPress={() => {}}>
+            <Text>Preguntas Frecuentes</Text>
+            <Text style={styles.cardRight}>Soporte</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.buttons}>
+          <Pressable style={styles.btn} onPress={handleLogout} accessibilityLabel="Cerrar sesión">
+            <Text style={styles.btnText}>Cerrar Sesión</Text>
+          </Pressable>
+          <Pressable style={styles.btn} onPress={handleLogout} accessibilityLabel="Cambiar usuario">
+            <Text style={styles.btnText}>Cambiar de Usuario</Text>
+          </Pressable>
         </View>
       </View>
     </ScrollView>
@@ -127,136 +127,98 @@ const ProfileScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  header: {
-    paddingTop: 50,
-    paddingBottom: 15,
-    paddingHorizontal: 20,
-    backgroundColor: '#6200EE',
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'white',
-  },
-  profileSection: {
-    alignItems: 'center',
-    backgroundColor: 'white',
-    marginTop: -20,
-    marginHorizontal: 20,
-    borderRadius: 10,
     padding: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    marginBottom: 10,
-  },
-  profileName: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    marginBottom: 5,
-  },
-  levelBadge: {
-    backgroundColor: '#6200EE',
-    paddingHorizontal: 15,
-    paddingVertical: 5,
-    borderRadius: 15,
-  },
-  levelText: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
-  statsContainer: {
-    flexDirection: 'row',
-    backgroundColor: 'white',
-    marginHorizontal: 20,
-    marginTop: 20,
-    borderRadius: 10,
-    padding: 15,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  statItem: {
-    flex: 1,
     alignItems: 'center',
+    backgroundColor: '#fff'
   },
-  statValue: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#6200EE',
+  cardContainer: {
+    width: Math.min(380, Dimensions.get('window').width - 20),
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 15,
+    padding: 15,
+    backgroundColor: '#fff'
   },
-  statLabel: {
+  profile: {
+    alignItems: 'center',
+    marginBottom: 12
+  },
+  avatar: {
+    width: 120,
+    height: 120,
+    borderRadius: 15,
+    marginBottom: 10
+  },
+  username: {
+    fontSize: 22,
+    fontWeight: 'bold'
+  },
+  level: {
     fontSize: 14,
-    color: '#666',
+    color: 'gray',
+    marginBottom: 8
+  },
+  progress: {
+    width: '100%',
+    height: 12,
+    backgroundColor: '#ccc',
+    borderRadius: 10,
+    overflow: 'hidden',
+    marginBottom: 20
+  },
+  progressBar: {
+    height: '100%',
+    backgroundColor: '#4daafc'
   },
   section: {
-    marginTop: 20,
-    marginHorizontal: 20,
+    marginBottom: 15
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
     marginBottom: 10,
+    fontWeight: '600'
   },
-  menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'white',
+  card: {
+    borderWidth: 1,
+    borderColor: '#ddd',
     borderRadius: 10,
-    padding: 15,
-    marginBottom: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  menuItemText: {
-    flex: 1,
-    fontSize: 16,
-    marginLeft: 10,
-  },
-  statsGrid: {
+    padding: 10,
+    marginBottom: 8,
     flexDirection: 'row',
-    flexWrap: 'wrap',
     justifyContent: 'space-between',
+    alignItems: 'center'
   },
-  statBox: {
-    width: '48%',
-    backgroundColor: 'white',
+  highlight: {
+    backgroundColor: '#fffbf0',
+    padding: 8,
+    borderRadius: 10
+  },
+  sectionHelp: {
+    backgroundColor: '#9c7df5',
+    color: '#fff',
+    padding: 10,
     borderRadius: 10,
-    padding: 15,
-    marginBottom: 10,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    marginBottom: 10
   },
-  statBoxValue: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
-    marginVertical: 5,
+  cardRight: {
+    color: '#666'
   },
-  statBoxLabel: {
-    fontSize: 12,
-    color: '#666',
-    textAlign: 'center',
+  buttons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10
   },
+  btn: {
+    borderWidth: 1,
+    borderColor: '#aaa',
+    padding: 8,
+    borderRadius: 8,
+    width: '48%',
+    alignItems: 'center'
+  },
+  btnText: {
+    fontSize: 14
+  }
 });
 
 export default ProfileScreen;
