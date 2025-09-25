@@ -1,0 +1,9 @@
+Backup note: files modified by assistant before running `npm audit fix --force`:
+- src/utils/soundService.js
+- src/screens/WelcomeScreen.js
+- src/utils/notificationService.js
+- App.js
+- src/screens/WelcomeScreen.js (removed sound load)
+- README_ASSETS.md
+
+If audit fixes break the app, revert these files from source control or from backups.

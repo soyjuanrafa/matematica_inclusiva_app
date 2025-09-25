@@ -1,0 +1,121 @@
+{
+  "@react-native-async-storage/async-storage": {
+    "current": "1.18.2",
+    "wanted": "1.18.2",
+    "latest": "2.2.0",
+    "dependent": "MathInclusiveApp",
+    "location": "C:\\Users\\ivanc\\Desktop\\trabajo\\MathInclusiveApp\\node_modules\\@react-native-async-storage\\async-storage"
+  },
+  "@react-native-masked-view/masked-view": {
+    "current": "0.2.9",
+    "wanted": "0.2.9",
+    "latest": "0.3.2",
+    "dependent": "MathInclusiveApp",
+    "location": "C:\\Users\\ivanc\\Desktop\\trabajo\\MathInclusiveApp\\node_modules\\@react-native-masked-view\\masked-view"
+  },
+  "@react-navigation/bottom-tabs": {
+    "current": "6.6.1",
+    "wanted": "6.6.1",
+    "latest": "7.4.7",
+    "dependent": "MathInclusiveApp",
+    "location": "C:\\Users\\ivanc\\Desktop\\trabajo\\MathInclusiveApp\\node_modules\\@react-navigation\\bottom-tabs"
+  },
+  "@react-navigation/native": {
+    "current": "6.1.18",
+    "wanted": "6.1.18",
+    "latest": "7.1.17",
+    "dependent": "MathInclusiveApp",
+    "location": "C:\\Users\\ivanc\\Desktop\\trabajo\\MathInclusiveApp\\node_modules\\@react-navigation\\native"
+  },
+  "@react-navigation/stack": {
+    "current": "6.4.1",
+    "wanted": "6.4.1",
+    "latest": "7.4.8",
+    "dependent": "MathInclusiveApp",
+    "location": "C:\\Users\\ivanc\\Desktop\\trabajo\\MathInclusiveApp\\node_modules\\@react-navigation\\stack"
+  },
+  "expo": {
+    "current": "49.0.23",
+    "wanted": "49.0.23",
+    "latest": "54.0.10",
+    "dependent": "MathInclusiveApp",
+    "location": "C:\\Users\\ivanc\\Desktop\\trabajo\\MathInclusiveApp\\node_modules\\expo"
+  },
+  "expo-av": {
+    "current": "13.4.1",
+    "wanted": "13.4.1",
+    "latest": "16.0.7",
+    "dependent": "MathInclusiveApp",
+    "location": "C:\\Users\\ivanc\\Desktop\\trabajo\\MathInclusiveApp\\node_modules\\expo-av"
+  },
+  "expo-device": {
+    "current": "5.4.0",
+    "wanted": "5.4.0",
+    "latest": "8.0.8",
+    "dependent": "MathInclusiveApp",
+    "location": "C:\\Users\\ivanc\\Desktop\\trabajo\\MathInclusiveApp\\node_modules\\expo-device"
+  },
+  "expo-notifications": {
+    "current": "0.20.1",
+    "wanted": "0.20.1",
+    "latest": "0.32.11",
+    "dependent": "MathInclusiveApp",
+    "location": "C:\\Users\\ivanc\\Desktop\\trabajo\\MathInclusiveApp\\node_modules\\expo-notifications"
+  },
+  "expo-speech": {
+    "current": "11.3.0",
+    "wanted": "11.3.0",
+    "latest": "14.0.7",
+    "dependent": "MathInclusiveApp",
+    "location": "C:\\Users\\ivanc\\Desktop\\trabajo\\MathInclusiveApp\\node_modules\\expo-speech"
+  },
+  "expo-status-bar": {
+    "current": "1.6.0",
+    "wanted": "1.6.0",
+    "latest": "3.0.8",
+    "dependent": "MathInclusiveApp",
+    "location": "C:\\Users\\ivanc\\Desktop\\trabajo\\MathInclusiveApp\\node_modules\\expo-status-bar"
+  },
+  "react": {
+    "current": "18.2.0",
+    "wanted": "18.2.0",
+    "latest": "19.1.1",
+    "dependent": "MathInclusiveApp",
+    "location": "C:\\Users\\ivanc\\Desktop\\trabajo\\MathInclusiveApp\\node_modules\\react"
+  },
+  "react-native": {
+    "current": "0.72.10",
+    "wanted": "0.72.10",
+    "latest": "0.81.4",
+    "dependent": "MathInclusiveApp",
+    "location": "C:\\Users\\ivanc\\Desktop\\trabajo\\MathInclusiveApp\\node_modules\\react-native"
+  },
+  "react-native-gesture-handler": {
+    "current": "2.12.1",
+    "wanted": "2.12.1",
+    "latest": "2.28.0",
+    "dependent": "MathInclusiveApp",
+    "location": "C:\\Users\\ivanc\\Desktop\\trabajo\\MathInclusiveApp\\node_modules\\react-native-gesture-handler"
+  },
+  "react-native-reanimated": {
+    "current": "3.3.0",
+    "wanted": "3.3.0",
+    "latest": "4.1.0",
+    "dependent": "MathInclusiveApp",
+    "location": "C:\\Users\\ivanc\\Desktop\\trabajo\\MathInclusiveApp\\node_modules\\react-native-reanimated"
+  },
+  "react-native-safe-area-context": {
+    "current": "4.6.3",
+    "wanted": "4.6.3",
+    "latest": "5.6.1",
+    "dependent": "MathInclusiveApp",
+    "location": "C:\\Users\\ivanc\\Desktop\\trabajo\\MathInclusiveApp\\node_modules\\react-native-safe-area-context"
+  },
+  "react-native-screens": {
+    "current": "3.22.1",
+    "wanted": "3.22.1",
+    "latest": "4.16.0",
+    "dependent": "MathInclusiveApp",
+    "location": "C:\\Users\\ivanc\\Desktop\\trabajo\\MathInclusiveApp\\node_modules\\react-native-screens"
+  }
+}

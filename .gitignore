@@ -1,0 +1,9 @@
+# Generated .gitignore
+node_modules/
+.expo/
+.expo
+.DS_Store
+android/
+ios/
+.vscode/
+.env
