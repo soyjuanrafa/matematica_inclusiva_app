@@ -7,7 +7,7 @@ export const SoundService = {
     try {
       // If we've already loaded sounds, skip reloading
       if (this.sounds && Object.keys(this.sounds).length > 0) {
-        console.log('Sounds already loaded, skipping reload');
+        console.debug('Sounds already loaded, skipping reload');
         return true;
       }
 
@@ -15,8 +15,8 @@ export const SoundService = {
         try {
           await soundInstance.loadAsync(assetRequire);
           return soundInstance;
-        } catch (err) {
-          console.warn('Could not load sound asset:', assetRequire, err.message || err);
+          } catch (err) {
+          console.debug('Could not load sound asset (ignored):', err.message || err);
           return null;
         }
       };
@@ -38,7 +38,7 @@ export const SoundService = {
         const achievementAsset = require('../../assets/sounds/achievement.mp3');
         loadedAchievement = await tryLoad(achievementSound, achievementAsset);
       } catch (e) {
-        console.warn('Achievement sound not found, skipping achievement sound.');
+        console.debug('Achievement sound not found, skipping.');
       }
 
       // Assemble sounds map only with successfully loaded sounds
@@ -48,7 +48,7 @@ export const SoundService = {
       if (loadedButton) this.sounds.button = loadedButton;
       if (loadedAchievement) this.sounds.achievement = loadedAchievement;
 
-      console.log('SoundService: loadSounds finished. Loaded:', Object.keys(this.sounds));
+  console.debug('SoundService: loaded sounds:', Object.keys(this.sounds));
       return true;
     } catch (error) {
       console.error('Error loading sounds:', error);
@@ -61,13 +61,13 @@ export const SoundService = {
     try {
       const sound = this.sounds[soundName];
       if (!sound) {
-        console.warn(`Sound ${soundName} not found or not loaded`);
+        console.debug(`Sound ${soundName} not found or not loaded`);
         return;
       }
 
       const status = await sound.getStatusAsync();
       if (!status.isLoaded) {
-        console.warn(`Sound ${soundName} is not loaded (status), attempting to reload all sounds`);
+        console.debug(`Sound ${soundName} is not loaded, reloading sounds`);
         await this.loadSounds();
       }
 
@@ -94,7 +94,7 @@ export const SoundService = {
         }
       }
       this.sounds = {};
-      console.log('Sounds unloaded successfully');
+  console.debug('Sounds unloaded successfully');
     } catch (error) {
       console.error('Error unloading sounds:', error);
     }

@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, SafeAreaView } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity, SafeAreaView, Animated, Modal, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useCharacter } from '../context/CharacterContext';
+import { COLORS, FONTS } from '../theme';
 
 const CHARACTERS = [
   {
@@ -8,6 +10,9 @@ const CHARACTERS = [
     name: 'Triángulo',
     displayName: 'Trii',
     role: 'Fácil',
+    level: 1,
+    accessories: 'Lentes grandes, Moño azul',
+    personality: 'Inteligente, alegre, curioso',
     color: '#F5A623',
     shape: 'triangle',
     gender: 'female',
@@ -17,6 +22,9 @@ const CHARACTERS = [
     name: 'Círculo',
     displayName: 'Ciro',
     role: 'Medio Fácil',
+    level: 2,
+    accessories: 'Cuaderno/Hoja',
+    personality: 'Entusiasta, creativo, expresivo',
     color: '#4A90E2',
     shape: 'circle',
     gender: 'male',
@@ -26,8 +34,11 @@ const CHARACTERS = [
     name: 'Cuadrado',
     displayName: 'Quad',
     role: 'Avanzado',
-    color: '#222222',
-    accent: '#7B61FF',
+    level: 3,
+    color: '#7B61FF',
+    accent: '#F5A623',
+    accessories: 'Gorra naranja',
+    personality: 'Divertido, relajado, amistoso',
     shape: 'square',
     gender: 'male',
   }
@@ -35,6 +46,10 @@ const CHARACTERS = [
 
 const CharacterScreen = ({ navigation }) => {
   const [selected, setSelected] = useState(CHARACTERS[1]);
+  const { selectCharacter } = useCharacter();
+  const [pending, setPending] = useState(null);
+  const [confirmVisible, setConfirmVisible] = useState(false);
+  const bounce = useRef(new Animated.Value(1)).current;
   const progressPercent = 60;
 
   const renderShape = (char, size = 150) => {
@@ -96,6 +111,12 @@ const CharacterScreen = ({ navigation }) => {
           {renderShape(selected, 150)}
           <Text style={styles.name}>{selected.displayName}</Text>
           <Text style={styles.level}>Nivel {selected.role}</Text>
+          {selected.accessories && (
+            <Text style={styles.smallInfo}>Accesorios: {selected.accessories}</Text>
+          )}
+          {selected.personality && (
+            <Text style={styles.smallInfo}>Personalidad: {selected.personality}</Text>
+          )}
 
           <View style={styles.progress} accessibilityLabel="Progreso">
             <View style={[styles.progressBar, { width: `${progressPercent}%` }]} />
@@ -104,17 +125,82 @@ const CharacterScreen = ({ navigation }) => {
 
         <Text style={styles.sectionTitle}>Elige un personaje</Text>
         <View style={styles.selectorRow}>
-          {CHARACTERS.map((c) => (
-            <TouchableOpacity key={c.id} style={[styles.selector, selected.id === c.id && styles.selectorActive]} onPress={() => setSelected(c)}>
-              <View style={{ alignItems: 'center' }}>
-                {c.shape === 'triangle' && <View style={[styles.miniTriangle, { borderBottomColor: c.color }]} />}
-                {c.shape === 'circle' && <View style={[styles.miniCircle, { backgroundColor: c.color }]} />}
-                {c.shape === 'square' && <View style={[styles.miniSquare, { backgroundColor: c.color }]} />}
-                <Text style={styles.selectorLabel}>{c.name}</Text>
-              </View>
-            </TouchableOpacity>
-          ))}
+          {CHARACTERS.map((c) => {
+            const isActive = selected.id === c.id;
+            return (
+              <TouchableOpacity
+                key={c.id}
+                style={[styles.selector, isActive && styles.selectorActive]}
+                onPress={() => {
+                  // open confirmation modal for this character
+                  setPending(c);
+                  setConfirmVisible(true);
+                }}
+              >
+                <Animated.View style={{ alignItems: 'center', transform: [{ scale: isActive ? bounce : 1 }] }}>
+                  {c.shape === 'triangle' && <View style={[styles.miniTriangle, { borderBottomColor: c.color }]} />}
+                  {c.shape === 'circle' && <View style={[styles.miniCircle, { backgroundColor: c.color }]} />}
+                  {c.shape === 'square' && <View style={[styles.miniSquare, { backgroundColor: c.color }]} />}
+                  <Text style={styles.selectorLabel}>{c.name}</Text>
+                </Animated.View>
+              </TouchableOpacity>
+            );
+          })}
         </View>
+
+        {/* Confirmation modal */}
+        <Modal
+          visible={confirmVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setConfirmVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalCard}>
+              <Text style={styles.modalTitle}>Confirmar Personaje</Text>
+              {pending && (
+                <View style={{ alignItems: 'center' }}>
+                  {renderShape(pending, 100)}
+                  <Text style={styles.modalName}>{pending.displayName || pending.name}</Text>
+                  <Text style={styles.modalRole}>{pending.role}</Text>
+                  {pending.accessories && <Text style={styles.modalSmall}>Accesorios: {pending.accessories}</Text>}
+                  {pending.personality && <Text style={styles.modalSmall}>Personalidad: {pending.personality}</Text>}
+                </View>
+              )}
+
+              <View style={styles.modalButtons}>
+                <Pressable
+                  style={[styles.modalBtn, styles.modalCancel]}
+                  onPress={() => { setConfirmVisible(false); setPending(null); }}
+                >
+                  <Text>Cancelar</Text>
+                </Pressable>
+                <Pressable
+                  style={[styles.modalBtn, styles.modalConfirm]}
+                  onPress={() => {
+                    if (pending) {
+                      try {
+                        selectCharacter(pending);
+                      } catch (e) {
+                          console.debug('Error selecting character', e);
+                      }
+                      setSelected(pending);
+                      // bounce animation
+                      Animated.sequence([
+                        Animated.timing(bounce, { toValue: 1.12, duration: 120, useNativeDriver: true }),
+                        Animated.timing(bounce, { toValue: 1, duration: 180, useNativeDriver: true })
+                      ]).start();
+                    }
+                    setConfirmVisible(false);
+                    setPending(null);
+                  }}
+                >
+                  <Text style={{ color: 'white' }}>Confirmar</Text>
+                </Pressable>
+              </View>
+            </View>
+          </View>
+        </Modal>
 
         <Text style={styles.sectionTitle}>Logros</Text>
         <View style={styles.rowCenter}>
@@ -176,11 +262,11 @@ const styles = StyleSheet.create({
   glassCircle: { width: 28, height: 24, borderRadius: 14, borderWidth: 3, borderColor: 'rgba(0,0,0,0.6)', marginHorizontal: 6 },
   glassBridge: { width: 20, height: 6, backgroundColor: 'rgba(0,0,0,0.6)', marginHorizontal: -6 },
   hat: { width: 80, height: 22, backgroundColor: 'rgba(0,0,0,0.6)', borderRadius: 6, marginBottom: 6 },
-  name: { marginTop: 10, fontSize: 24, fontWeight: 'bold', color: 'white' },
-  level: { fontSize: 16, color: 'white' },
+  name: { marginTop: 10, fontSize: 24, fontWeight: 'bold', color: 'white', fontFamily: FONTS.logo },
+  level: { fontSize: 16, color: 'white', fontFamily: FONTS.content },
   progress: { width: '80%', height: 12, backgroundColor: 'rgba(255,255,255,0.5)', borderRadius: 10, marginTop: 10, overflow: 'hidden' },
   progressBar: { height: '100%', backgroundColor: 'white', borderRadius: 10 },
-  sectionTitle: { marginLeft: 20, marginTop: 20, fontSize: 18, color: 'white' },
+  sectionTitle: { marginLeft: 20, marginTop: 20, fontSize: 18, color: 'white', fontFamily: FONTS.content },
   rowCenter: { flexDirection: 'row', justifyContent: 'center', marginTop: 10 },
   iconBox: { width: 70, height: 90, backgroundColor: 'white', borderRadius: 10, justifyContent: 'center', alignItems: 'center', marginHorizontal: 5 },
   iconEmoji: { fontSize: 26 },
@@ -193,6 +279,17 @@ const styles = StyleSheet.create({
   miniCircle: { width: 48, height: 48, borderRadius: 24 },
   miniSquare: { width: 48, height: 48, borderRadius: 8 },
   miniTriangle: { width: 0, height: 0, borderLeftWidth: 24, borderRightWidth: 24, borderBottomWidth: 48, borderLeftColor: 'transparent', borderRightColor: 'transparent' },
+  smallInfo: { marginTop: 6, color: 'white', fontSize: 14, fontFamily: FONTS.content },
+  modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.45)', justifyContent: 'center', alignItems: 'center' },
+  modalCard: { width: '84%', backgroundColor: 'white', borderRadius: 12, padding: 16, alignItems: 'center' },
+  modalTitle: { fontSize: 18, fontWeight: '700', marginBottom: 8 },
+  modalName: { fontSize: 16, fontWeight: '700', marginTop: 8 },
+  modalRole: { fontSize: 13, color: '#666', marginBottom: 6 },
+  modalSmall: { fontSize: 13, color: '#444', textAlign: 'center' },
+  modalButtons: { flexDirection: 'row', marginTop: 12 },
+  modalBtn: { paddingVertical: 8, paddingHorizontal: 12, borderRadius: 8, marginHorizontal: 8 },
+  modalCancel: { backgroundColor: '#eee' },
+  modalConfirm: { backgroundColor: COLORS.primary },
 });
 
 export default CharacterScreen;

@@ -16,7 +16,7 @@ for (const rel of files) {
   const p = path.join(__dirname, '..', rel);
   try {
     if (!fs.existsSync(p)) {
-      console.warn('Missing file:', p);
+      console.debug('Missing file (skipping):', p);
       continue;
     }
     const txt = fs.readFileSync(p, 'utf8').trim();
@@ -26,11 +26,11 @@ for (const rel of files) {
       // quick check: PNG header 89 50 4E 47
       if (buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4E && buf[3] === 0x47) {
         fs.writeFileSync(p, buf);
-        console.log('Decoded base64 -> binary for', rel);
+        console.debug('Decoded base64 -> binary for', rel);
         continue;
       }
     }
-    console.log('No base64 content detected (left untouched):', rel);
+    console.debug('No base64 content detected (left untouched):', rel);
   } catch (e) {
     console.error('Error processing', rel, e.message);
   }
