@@ -22,13 +22,7 @@ const WelcomeScreen = () => {
   const [logoError, setLogoError] = useState(false);
   
   useEffect(() => {
-    // Load sounds when component mounts
-    try {
-      SoundService.loadSounds();
-    } catch (error) {
-      console.error('Error loading sounds:', error);
-    }
-    
+    // Sounds are loaded at app level; don't reload here to avoid duplication
     // Start animations
     Animated.parallel([
       Animated.timing(fadeAnim, {

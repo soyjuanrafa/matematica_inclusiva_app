@@ -6,11 +6,15 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
-  Alert
+  Alert,
+  Image,
+  Animated,
+  Easing
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useUserProgress } from '../context/UserProgressContext';
+import { useCharacter } from '../context/CharacterContext';
 import AccessibleButton from '../components/AccessibleButton';
 import { SoundService } from '../utils/soundService';
 import * as Speech from 'expo-speech';
@@ -20,6 +24,20 @@ const LessonScreen = () => {
   const route = useRoute();
   const { lessonId } = route.params || { lessonId: 1 };
   const { updateUserProgress, accessibilitySettings } = useUserProgress();
+  const { selected: character } = useCharacter();
+  const waveAnim = new Animated.Value(0);
+
+  useEffect(() => {
+    // simple infinite horizontal wave animation
+    Animated.loop(
+      Animated.timing(waveAnim, {
+        toValue: 1,
+        duration: 4000,
+        easing: Easing.linear,
+        useNativeDriver: true
+      })
+    ).start();
+  }, []);
   
   const [loading, setLoading] = useState(true);
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -37,72 +55,108 @@ const LessonScreen = () => {
       // Aquí cargarías los datos de la lección desde una API o base de datos
       // Por ahora usamos datos de ejemplo
       
-      // Simular carga de datos
+      // Simular carga de datos usando el modelo proporcionado
       setTimeout(() => {
         const lessonData = {
           id: lessonId,
-          title: 'Orden de operaciones',
-          description: 'Aprende a resolver expresiones con múltiples operaciones',
+          title: 'La Montaña de las Operaciones',
+          description: 'Sube la montaña resolviendo operaciones',
+          character: character?.displayName ? `${character.displayName} (${character.name})` : 'Roko (Cuadrado morado, gorra naranja)',
+          background: 'Olas con cuerda animada',
+          // Multiple varied questions for variety
           questions: [
             {
               id: 1,
-              question: '¿Cuál es el resultado de 2 + 3 × 4?',
-              options: ['20', '14', '11', '5'],
-              correctAnswer: 2, // Índice de la respuesta correcta (0-based)
-              explanation: 'Primero se realiza la multiplicación (3 × 4 = 12) y luego la suma (2 + 12 = 14).'
+              question: '2 + 4 × 8 = ...',
+              options: [44, 39, 36, 48, 34],
+              correctAnswerValue: 34,
+              explanation: 'Se realiza primero la multiplicación: 4 × 8 = 32. Luego 2 + 32 = 34.'
             },
             {
               id: 2,
-              question: '¿Cuál es el resultado de (8 - 2) × 3?',
-              options: ['18', '6', '12', '24'],
-              correctAnswer: 0, // Índice de la respuesta correcta (0-based)
-              explanation: 'Primero se resuelve el paréntesis (8 - 2 = 6) y luego la multiplicación (6 × 3 = 18).'
+              question: '¿Cuál es el resultado de 5 × (2 + 3)?',
+              options: [25, 15, 10, 20],
+              correctAnswerValue: 25,
+              explanation: 'Se calcula el paréntesis: 2 + 3 = 5. Luego 5 × 5 = 25.'
             },
             {
               id: 3,
-              question: '¿Cuál es el resultado de 20 ÷ 4 + 3 × 2?',
-              options: ['5', '11', '10', '8'],
-              correctAnswer: 1, // Índice de la respuesta correcta (0-based)
-              explanation: 'Primero se realizan las operaciones de división y multiplicación (20 ÷ 4 = 5, 3 × 2 = 6) y luego la suma (5 + 6 = 11).'
+              question: 'Completa: ? × 7 = 42',
+              options: [5, 6, 7, 8],
+              correctAnswerValue: 6,
+              explanation: '6 × 7 = 42, por tanto ? = 6.'
+            },
+            {
+              id: 4,
+              question: '¿Cuál es mayor?',
+              options: [7, 8, 9, 10],
+              correctAnswerValue: 10,
+              explanation: '3+4=7; 2*4=8; 9; 10 → mayor es 10.'
+            },
+            {
+              id: 5,
+              question: 'Si tienes 3 bolsas con 4 manzanas cada una, ¿cuántas manzanas en total?',
+              options: [7, 12, 9, 15],
+              correctAnswerValue: 12,
+              explanation: '3 × 4 = 12 manzanas en total.'
             }
           ]
         };
-        
+
         setLesson(lessonData);
         setLoading(false);
-        
-        // Leer la pregunta si el texto a voz está activado
+
         if (accessibilitySettings?.textToSpeech) {
-          const questionText = lessonData.questions[0].question;
-          Speech.speak(questionText, { language: 'es' });
+          Speech.speak(lessonData.questions[0].question, { language: 'es' });
         }
-      }, 1000);
+      }, 600);
     } catch (error) {
       console.error('Error loading lesson:', error);
       Alert.alert('Error', 'No se pudo cargar la lección');
       navigation.goBack();
     }
   };
+
+  const renderAvatar = (char, size = 48) => {
+    // prefer character image if provided, otherwise fallback to character-square or avatar-placeholder
+    try {
+      if (char && char.image) {
+        return <Image source={char.image} style={{ width: size, height: size, borderRadius: 8, marginRight: 12 }} />;
+      }
+    } catch (e) {}
+
+    // fallback mapping by shape
+    const src = (char && (char.shape === 'square')) ? require('../../assets/character-square.png') : require('../../assets/avatar-placeholder.png');
+    return <Image source={src} style={{ width: size, height: size, borderRadius: 8, marginRight: 12 }} />;
+  };
+
+  const WaveBackground = ({ color = '#E3F2FD' }) => {
+    const translateX = waveAnim.interpolate({ inputRange: [0, 1], outputRange: [0, -120] });
+    return (
+      <View style={styles.waveContainer} pointerEvents="none">
+        <Animated.View style={[styles.wave, { backgroundColor: color, opacity: 0.4, transform: [{ translateX }] }]} />
+        <Animated.View style={[styles.wave, { backgroundColor: color, opacity: 0.25, transform: [{ translateX: Animated.add(translateX, 60) }] }]} />
+        <Animated.View style={[styles.wave, { backgroundColor: color, opacity: 0.15, transform: [{ translateX: Animated.add(translateX, 120) }] }]} />
+      </View>
+    );
+  };
   
   const handleAnswerSelect = (answerIndex) => {
     setSelectedAnswer(answerIndex);
-    
     const currentQ = lesson.questions[currentQuestion];
-    const isCorrect = answerIndex === currentQ.correctAnswer;
-    
+    const selectedValue = currentQ.options[answerIndex];
+    const isCorrect = selectedValue === currentQ.correctAnswerValue;
+
     setIsAnswerCorrect(isCorrect);
-    
+
     // Reproducir sonido según la respuesta
-    if (isCorrect) {
-      SoundService.playSound('correct');
-    } else {
-      SoundService.playSound('incorrect');
-    }
-    
-    // Actualizar puntuación
-    if (isCorrect) {
-      setScore(score + 1);
-    }
+    try {
+      if (isCorrect) SoundService.playSound('correct');
+      else SoundService.playSound('incorrect');
+    } catch (e) {}
+
+    // Actualizar puntuación (binary)
+    if (isCorrect) setScore(s => s + 1);
   };
   
   const handleNextQuestion = () => {
@@ -120,17 +174,15 @@ const LessonScreen = () => {
       // Lección completada
       const totalQuestions = lesson.questions.length;
       const finalScore = score + (isAnswerCorrect ? 1 : 0);
-      
-      // Actualizar progreso del usuario
+
       updateUserProgress(lessonId, finalScore);
-      
-      // Navegar a la pantalla de finalización
+
       navigation.navigate('LessonCompletion', {
         score: finalScore,
         totalQuestions,
         lessonId,
         question: lesson.questions[currentQuestion].question,
-        answer: lesson.questions[currentQuestion].options[lesson.questions[currentQuestion].correctAnswer]
+        answer: lesson.questions[currentQuestion].correctAnswerValue
       });
     }
   };
@@ -148,7 +200,7 @@ const LessonScreen = () => {
   
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+  <View style={styles.header}>
         <TouchableOpacity 
           style={styles.backButton}
           onPress={() => navigation.goBack()}
@@ -156,13 +208,20 @@ const LessonScreen = () => {
         >
           <Ionicons name="arrow-back" size={24} color="white" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>{lesson.title}</Text>
+        <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
+          {renderAvatar(character, 48)}
+          <View style={{ flex: 1 }}>
+            <Text style={styles.headerTitle}>{lesson.title}</Text>
+            <Text style={{ color: 'white', fontSize: 12 }}>{lesson.character}</Text>
+          </View>
+        </View>
         <View style={styles.progressIndicator}>
           <Text style={styles.progressText}>
             {currentQuestion + 1}/{lesson.questions.length}
           </Text>
         </View>
-      </View>
+  </View>
+  <WaveBackground color={character?.color || '#E3F2FD'} />
       
       <ScrollView style={styles.content}>
         <View style={styles.questionContainer}>
@@ -178,7 +237,7 @@ const LessonScreen = () => {
                 selectedAnswer === index && styles.selectedOption,
                 selectedAnswer === index && isAnswerCorrect && styles.correctOption,
                 selectedAnswer === index && !isAnswerCorrect && styles.incorrectOption,
-                selectedAnswer !== null && currentQ.correctAnswer === index && styles.correctOption
+                selectedAnswer !== null && currentQ.correctAnswerValue === option && styles.correctOption
               ]}
               onPress={() => selectedAnswer === null && handleAnswerSelect(index)}
               disabled={selectedAnswer !== null}
@@ -190,7 +249,7 @@ const LessonScreen = () => {
                 selectedAnswer === index && styles.selectedOptionText,
                 selectedAnswer === index && isAnswerCorrect && styles.correctOptionText,
                 selectedAnswer === index && !isAnswerCorrect && styles.incorrectOptionText,
-                selectedAnswer !== null && currentQ.correctAnswer === index && styles.correctOptionText
+                selectedAnswer !== null && currentQ.correctAnswerValue === option && styles.correctOptionText
               ]}>
                 {option}
               </Text>
@@ -204,7 +263,7 @@ const LessonScreen = () => {
               styles.feedbackText,
               isAnswerCorrect ? styles.correctFeedbackText : styles.incorrectFeedbackText
             ]}>
-              {isAnswerCorrect ? '¡Correcto!' : 'Incorrecto'}
+              {isAnswerCorrect ? '¡Correcto!' : `Incorrecto. La respuesta correcta es ${currentQ.correctAnswerValue}`}
             </Text>
             <Text style={styles.explanationText}>
               {currentQ.explanation}
@@ -250,6 +309,20 @@ const styles = StyleSheet.create({
     paddingBottom: 15,
     paddingHorizontal: 20,
     backgroundColor: '#6200EE',
+  },
+  waveContainer: {
+    ...StyleSheet.absoluteFillObject,
+    bottom: -20,
+    height: 120,
+    overflow: 'hidden'
+  },
+  wave: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    height: 60,
+    borderRadius: 30,
+    top: 20
   },
   backButton: {
     padding: 5,

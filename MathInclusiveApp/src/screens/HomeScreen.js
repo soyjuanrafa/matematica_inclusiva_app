@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { COLORS, FONTS } from '../theme';
 import { useUserProgress } from '../context/UserProgressContext';
 import AccessibleButton from '../components/AccessibleButton';
 
@@ -100,6 +101,10 @@ const HomeScreen = () => {
           </Text>
           <Ionicons name="chevron-forward" size={24} color="#6200EE" />
         </TouchableOpacity>
+        
+        <TouchableOpacity style={[styles.continueCard, { marginTop: 12 }]} onPress={() => navigation.navigate('Character')}>
+          <Text style={{ fontWeight: 'bold', color: '#333' }}>Personajes</Text>
+        </TouchableOpacity>
       </View>
     </ScrollView>
   );
@@ -114,17 +119,19 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     paddingBottom: 20,
     paddingHorizontal: 20,
-    backgroundColor: '#6200EE',
+    backgroundColor: COLORS.purple,
   },
   welcomeText: {
     fontSize: 18,
-    color: 'rgba(255, 255, 255, 0.8)',
+    color: 'rgba(255, 255, 255, 0.9)',
     marginBottom: 5,
+    fontFamily: FONTS.content,
   },
   headerTitle: {
     fontSize: 28,
     fontWeight: 'bold',
     color: 'white',
+    fontFamily: FONTS.logo,
   },
   statsContainer: {
     flexDirection: 'row',
@@ -146,7 +153,8 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#6200EE',
+    color: COLORS.primary,
+    fontFamily: FONTS.content,
   },
   statLabel: {
     fontSize: 14,
@@ -157,8 +165,10 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: '600',
     marginBottom: 15,
+    color: COLORS.text,
+    fontFamily: FONTS.content,
   },
   continueCard: {
     backgroundColor: 'white',
@@ -177,8 +187,10 @@ const styles = StyleSheet.create({
   },
   continueCardTitle: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '700',
     marginBottom: 5,
+    color: COLORS.text,
+    fontFamily: FONTS.content,
   },
   continueCardSubtitle: {
     fontSize: 14,
@@ -261,6 +273,8 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     marginLeft: 10,
+    color: COLORS.text,
+    fontFamily: FONTS.content,
   },
 });
 

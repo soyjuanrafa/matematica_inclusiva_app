@@ -1,6 +1,5 @@
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
-import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 
 // Configurar el comportamiento de las notificaciones
@@ -24,7 +23,7 @@ export const NotificationService = {
       }
       
       if (finalStatus !== 'granted') {
-        console.log('No se obtuvieron permisos para notificaciones');
+        console.debug('Notification permissions not granted');
         return false;
       }
       
@@ -39,7 +38,7 @@ export const NotificationService = {
       
       return true;
     } else {
-      console.log('Las notificaciones solo funcionan en dispositivos físicos');
+      console.debug('Notifications require a physical device');
       return false;
     }
   },

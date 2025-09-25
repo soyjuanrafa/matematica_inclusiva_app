@@ -15,16 +15,27 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.soyjuanrafa.cuentaconmigo",
+      "infoPlist": {
+        "NSUserNotificationUsageDescription": "La aplicación utiliza notificaciones para recordatorios y mejoras en la experiencia de aprendizaje.",
+        "UIBackgroundModes": [
+          "remote-notification"
+        ]
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#6200EE"
-      }
+      },
+      "package": "com.soyjuanrafa.cuentaconmigo"
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "plugins": [
+      "expo-font"
+    ]
   }
 }

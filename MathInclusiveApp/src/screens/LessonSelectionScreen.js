@@ -11,86 +11,70 @@ import {
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useUserProgress } from '../context/UserProgressContext';
+import { useCharacter } from '../context/CharacterContext';
+import { SoundService } from '../utils/soundService';
 import LessonCard from '../components/LessonCard';
 
 const LessonSelectionScreen = () => {
   const navigation = useNavigation();
   const { progress } = useUserProgress();
+  const { selected: character } = useCharacter();
   const [loading, setLoading] = useState(true);
   const [lessons, setLessons] = useState([]);
+  const [soundEnabled, setSoundEnabled] = useState(true);
   
   useEffect(() => {
     // Simular carga de lecciones desde una API
     const loadLessons = async () => {
-      // Aquí cargarías las lecciones desde una API o base de datos
-      // Por ahora usamos datos de ejemplo
+      // Build the lesson list to match the requested model
       const exampleLessons = [
         {
           id: 1,
-          title: 'Operaciones básicas',
-          description: 'Suma, resta, multiplicación y división',
-          image: require('../../assets/character-square.png'),
-          backgroundColor: '#E8F5E9',
-          textColor: '#2E7D32',
-          borderColor: '#A5D6A7',
-          progress: 100,
-          completedLessons: 3,
-          totalLessons: 3,
+          title: 'El poder de los Números Gigantes',
+          description: 'Explora números enormes de forma divertida',
+          iconName: 'trophy',
           unlocked: true
         },
         {
           id: 2,
-          title: 'Orden de operaciones',
-          description: 'Aprende a resolver expresiones con múltiples operaciones',
-          image: require('../../assets/character-square.png'),
-          backgroundColor: '#E3F2FD',
-          textColor: '#1565C0',
-          borderColor: '#90CAF9',
-          progress: 50,
-          completedLessons: 1,
-          totalLessons: 2,
+          title: 'La Montaña de las Operaciones',
+          description: 'Sube la montaña resolviendo operaciones',
+          iconName: 'calculator',
           unlocked: true
         },
         {
           id: 3,
-          title: 'Fracciones',
-          description: 'Operaciones con fracciones y números mixtos',
-          image: require('../../assets/character-square.png'),
-          backgroundColor: '#FFF3E0',
-          textColor: '#E65100',
-          borderColor: '#FFCC80',
-          progress: 0,
-          completedLessons: 0,
-          totalLessons: 3,
+          title: 'Cazadores de Múltiplos',
+          description: 'Atrapa múltiplos y aprende patrones',
+          iconName: 'grid',
           unlocked: progress?.level >= 2
         },
         {
           id: 4,
-          title: 'Ecuaciones',
-          description: 'Resuelve ecuaciones de primer grado',
-          image: require('../../assets/character-square.png'),
-          backgroundColor: '#F3E5F5',
-          textColor: '#6A1B9A',
-          borderColor: '#CE93D8',
-          progress: 0,
-          completedLessons: 0,
-          totalLessons: 4,
+          title: 'Superpoderes de los Números',
+          description: 'Descubre poderes especiales de los números',
+          iconName: 'flash',
           unlocked: progress?.level >= 3
         }
       ];
-      
+
       setLessons(exampleLessons);
       setLoading(false);
     };
-    
+
     loadLessons();
   }, [progress]);
   
   const handleLessonPress = (lesson) => {
     if (lesson.unlocked) {
+      if (soundEnabled) {
+        try { SoundService.playSound('button'); } catch (e) { /* ignore */ }
+      }
       navigation.navigate('Lesson', { lessonId: lesson.id });
     }
   };
+
+  const handleToggleSound = () => setSoundEnabled(s => !s);
   
   if (loading) {
     return (
@@ -101,10 +85,25 @@ const LessonSelectionScreen = () => {
     );
   }
   
+  const characterLabel = character ? `${character.displayName || character.name} (${character.shape ? character.shape : ''}${character.color ? ', ' + (character.colorName || character.color) : ''})` : 'Roko (Cuadrado morado, gorra naranja)';
+
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Lecciones</Text>
+      <View style={[styles.header, { backgroundColor: character?.color || '#6200EE' }]}>
+        <View style={styles.headerTop}>
+          <View style={styles.headerLeft}>
+            <Text style={styles.greeting} numberOfLines={1}>{`¡Hola, soy ${character?.displayName || 'Roko'}! ¿Listos para aprender juntos?`}</Text>
+            <Text style={styles.subText}>¡Vamos a escoger una lección divertida hoy!</Text>
+          </View>
+          <View style={styles.headerRight}>
+            <TouchableOpacity style={styles.iconBtn} onPress={() => { if (soundEnabled) { try { SoundService.playSound('button'); } catch(e){} } }} accessibilityLabel="Play">
+                <Text style={styles.iconEmoji}>▶️</Text>
+              </TouchableOpacity>
+            <TouchableOpacity style={styles.iconBtn} onPress={handleToggleSound} accessibilityLabel="Toggle sonido">
+              <Text style={styles.iconEmoji}>{soundEnabled ? '🔊' : '🔈'}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
       
       <ScrollView style={styles.scrollView}>
@@ -131,15 +130,28 @@ const LessonSelectionScreen = () => {
         </View>
         
         <Text style={styles.sectionTitle}>Continúa aprendiendo</Text>
-        
-        {lessons.map((lesson) => (
-          <LessonCard
-            key={lesson.id}
-            lesson={lesson}
-            onPress={handleLessonPress}
-            style={!lesson.unlocked && styles.lockedLesson}
-          />
-        ))}
+
+        <View style={styles.lessonList}>
+          {lessons.map((lesson) => (
+            <TouchableOpacity
+              key={lesson.id}
+              style={[styles.lessonItem, !lesson.unlocked && styles.lockedLesson]}
+              onPress={() => handleLessonPress(lesson)}
+              disabled={!lesson.unlocked}
+            >
+              <View style={styles.lessonIcon}>
+                <Ionicons name={lesson.iconName || 'book'} size={28} color="#444" />
+              </View>
+              <View style={styles.lessonBody}>
+                <Text style={styles.lessonTitle}>{lesson.title}</Text>
+                <Text style={styles.lessonDesc}>{lesson.description}</Text>
+              </View>
+              <View style={styles.lessonRight}>
+                <Text style={{ color: lesson.unlocked ? '#2e7d32' : '#999' }}>{lesson.unlocked ? 'Iniciar' : 'Bloqueado'}</Text>
+              </View>
+            </TouchableOpacity>
+          ))}
+        </View>
         
         {!lessons.some(lesson => !lesson.unlocked) && (
           <View style={styles.allCompletedContainer}>
@@ -187,6 +199,39 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: 'white',
   },
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center'
+  },
+  headerLeft: {
+    flex: 1,
+    paddingRight: 12
+  },
+  greeting: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: '700'
+  },
+  subText: {
+    color: 'white',
+    fontSize: 13,
+    marginTop: 6
+  },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  iconBtn: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginLeft: 8
+  },
+  iconEmoji: { fontSize: 18 },
   scrollView: {
     flex: 1,
     padding: 15,
@@ -247,6 +292,36 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 15,
   },
+  lessonList: {
+    marginBottom: 30
+  },
+  lessonItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    padding: 12,
+    borderRadius: 12,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.06,
+    shadowRadius: 3,
+    elevation: 1
+  },
+  lessonIcon: {
+    width: 60,
+    height: 60,
+    borderRadius: 12,
+    backgroundColor: '#f2f2f2',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12
+  },
+  lessonIconText: { fontSize: 26 },
+  lessonBody: { flex: 1 },
+  lessonTitle: { fontSize: 16, fontWeight: '700', marginBottom: 4 },
+  lessonDesc: { color: '#666' },
+  lessonRight: { marginLeft: 8, alignItems: 'flex-end' },
   lockedLesson: {
     opacity: 0.6,
   },

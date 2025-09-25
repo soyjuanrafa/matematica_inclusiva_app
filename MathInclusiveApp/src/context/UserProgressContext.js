@@ -52,6 +52,23 @@ export const UserProgressProvider = ({ children }) => {
     setProgress(newProgress);
   };
 
+  // Establecer nivel del usuario (por ejemplo al elegir un personaje)
+  const setUserLevel = async (level) => {
+    try {
+      const current = await UserProgress.getProgress();
+      if (!current) return null;
+      const updated = { ...current, level };
+      // Re-evaluar logros si es necesario
+      updated.achievements = UserProgress.checkAchievements(updated);
+      await UserProgress.saveProgress(updated);
+      setProgress(updated);
+      return updated;
+    } catch (error) {
+      console.error('Error setting user level:', error);
+      return null;
+    }
+  };
+
   return (
     <UserProgressContext.Provider
       value={{
@@ -59,6 +76,7 @@ export const UserProgressProvider = ({ children }) => {
         loading,
         accessibilitySettings,
         updateUserProgress,
+        setUserLevel,
         updateAccessibilitySettings,
         resetUserProgress
       }}
