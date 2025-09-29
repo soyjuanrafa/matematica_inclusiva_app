@@ -106,6 +106,16 @@ const CharacterScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.page}>
+      <View style={styles.topHeader}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+          accessibilityLabel="Volver"
+        >
+          <Ionicons name="arrow-back" size={24} color="#333" />
+        </TouchableOpacity>
+        <Text style={styles.topHeaderTitle}>Elegir Personaje</Text>
+      </View>
       <View style={[styles.card, { backgroundColor: selected.color }]}> 
         <View style={styles.header}>
           {renderShape(selected, 150)}
@@ -230,6 +240,22 @@ const CharacterScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   page: { flex: 1, backgroundColor: '#f0f0f0' },
+  topHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 15,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  backButton: {
+    padding: 5,
+  },
+  topHeaderTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginLeft: 15,
+  },
   card: {
     width: '92%',
     alignSelf: 'center',

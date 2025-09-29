@@ -1,83 +1,55 @@
-// Este archivo simula llamadas a una API para obtener datos del usuario
-// En una app real, estas funciones harían peticiones HTTP a un servidor
+import api from './apiService';
 
-export const getUserAchievements = async () => {
-  // Simulamos una llamada a la API
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve([
-        {
-          id: 1,
-          title: 'Primeros pasos',
-          description: 'Completa tu primera lección',
-          icon: '🏆',
-          earned: true,
-          date: '10/05/2023',
-        },
-        {
-          id: 2,
-          title: 'Matemático novato',
-          description: 'Completa 5 lecciones',
-          icon: '🥉',
-          earned: true,
-          date: '15/05/2023',
-        },
-        {
-          id: 3,
-          title: 'Matemático intermedio',
-          description: 'Completa 15 lecciones',
-          icon: '🥈',
-          earned: false,
-        },
-        {
-          id: 4,
-          title: 'Matemático experto',
-          description: 'Completa 30 lecciones',
-          icon: '🥇',
-          earned: false,
-        },
-        {
-          id: 5,
-          title: 'Perfección',
-          description: 'Obtén una puntuación perfecta en una lección',
-          icon: '⭐',
-          earned: true,
-          date: '12/05/2023',
-        },
-        {
-          id: 6,
-          title: 'Racha ganadora',
-          description: 'Completa lecciones durante 5 días seguidos',
-          icon: '🔥',
-          earned: false,
-        },
-      ]);
-    }, 1000);
-  });
+export const getUserAchievements = async (userId) => {
+  try {
+    const response = await api.get(`/users/${userId}/achievements`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Error obteniendo logros');
+  }
 };
 
-export const getUserLevel = async () => {
-  // Simulamos una llamada a la API
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        level: 3,
-        points: 250,
-        nextLevel: 400,
-      });
-    }, 800);
-  });
+export const getUserLevel = async (userId) => {
+  try {
+    const response = await api.get(`/users/${userId}/level`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Error obteniendo nivel');
+  }
 };
 
-export const getUserStats = async () => {
-  // Simulamos una llamada a la API
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        lessonsCompleted: 12,
-        averageAccuracy: 85,
-        streak: 5,
-      });
-    }, 600);
-  });
+export const getUserStats = async (userId) => {
+  try {
+    const response = await api.get(`/users/${userId}/stats`);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Error obteniendo estadísticas');
+  }
+};
+
+// CRUD para logros
+export const createAchievement = async (userId, achievementData) => {
+  try {
+    const response = await api.post(`/users/${userId}/achievements`, achievementData);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Error creando logro');
+  }
+};
+
+export const updateAchievement = async (userId, achievementId, achievementData) => {
+  try {
+    const response = await api.put(`/users/${userId}/achievements/${achievementId}`, achievementData);
+    return response.data;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Error actualizando logro');
+  }
+};
+
+export const deleteAchievement = async (userId, achievementId) => {
+  try {
+    await api.delete(`/users/${userId}/achievements/${achievementId}`);
+  } catch (error) {
+    throw new Error(error.response?.data?.message || 'Error eliminando logro');
+  }
 };

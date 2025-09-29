@@ -109,9 +109,9 @@ const RewardsScreen = () => {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
           accessibilityLabel="Volver a la pantalla anterior"
@@ -120,6 +120,7 @@ const RewardsScreen = () => {
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Logros - Cuenta Conmigo</Text>
       </View>
+      <ScrollView>
       
       <View style={styles.userInfoContainer}>
         <View style={styles.levelContainer}>
@@ -196,7 +197,8 @@ const RewardsScreen = () => {
           <Text style={styles.statLabel}>Días de racha</Text>
         </View>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 };
 

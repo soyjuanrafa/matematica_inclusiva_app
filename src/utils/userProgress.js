@@ -20,6 +20,9 @@ export const UserProgress = {
         completedLessons: [],
         streak: 0,
         lastCompletedDate: null,
+        userName: 'Estudiante',
+        timeSpent: {}, // {lessonId: totalSeconds}
+        errors: {}, // {lessonId: {questionId: count}}
       };
     } catch (error) {
       console.error('Error loading progress:', error);
@@ -27,23 +30,23 @@ export const UserProgress = {
     }
   },
 
-  async updateProgress(lessonId, score) {
+  async updateProgress(lessonId, score, timeSpent = 0, errors = {}) {
     try {
       const currentProgress = await this.getProgress();
-      
+
       // Verificar si es una nueva lección completada
       const isNewLesson = !currentProgress.completedLessons.includes(lessonId);
-      
+
       // Actualizar racha diaria
       const today = new Date().toDateString();
       const lastDate = currentProgress.lastCompletedDate;
       let streak = currentProgress.streak || 0;
-      
+
       if (lastDate) {
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
         const yesterdayString = yesterday.toDateString();
-        
+
         if (today === lastDate) {
           // Ya completó una lección hoy, mantener racha
         } else if (yesterdayString === lastDate) {
@@ -57,7 +60,17 @@ export const UserProgress = {
         // Primera lección completada
         streak = 1;
       }
-      
+
+      // Actualizar tiempo y errores
+      const updatedTimeSpent = { ...currentProgress.timeSpent };
+      updatedTimeSpent[lessonId] = (updatedTimeSpent[lessonId] || 0) + timeSpent;
+
+      const updatedErrors = { ...currentProgress.errors };
+      if (!updatedErrors[lessonId]) updatedErrors[lessonId] = {};
+      Object.keys(errors).forEach(questionId => {
+        updatedErrors[lessonId][questionId] = (updatedErrors[lessonId][questionId] || 0) + errors[questionId];
+      });
+
       const updatedProgress = {
         ...currentProgress,
         points: currentProgress.points + score,
@@ -65,13 +78,15 @@ export const UserProgress = {
         completedLessons: isNewLesson ? [...currentProgress.completedLessons, lessonId] : currentProgress.completedLessons,
         lastCompletedDate: today,
         streak: streak,
+        timeSpent: updatedTimeSpent,
+        errors: updatedErrors,
       };
-      
+
       // Level up logic
       if (updatedProgress.points >= (currentProgress.level * 100)) {
         updatedProgress.level = currentProgress.level + 1;
       }
-      
+
       // Verificar logros
       updatedProgress.achievements = this.checkAchievements(updatedProgress);
 

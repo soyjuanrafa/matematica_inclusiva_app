@@ -33,8 +33,8 @@ export const UserProgressProvider = ({ children }) => {
   }, []);
 
   // Actualizar progreso
-  const updateUserProgress = async (lessonId, score) => {
-    const updatedProgress = await UserProgress.updateProgress(lessonId, score);
+  const updateUserProgress = async (lessonId, score, timeSpent = 0, errors = {}) => {
+    const updatedProgress = await UserProgress.updateProgress(lessonId, score, timeSpent, errors);
     setProgress(updatedProgress);
     return updatedProgress;
   };
@@ -69,6 +69,21 @@ export const UserProgressProvider = ({ children }) => {
     }
   };
 
+  // Actualizar nombre de usuario
+  const updateUserName = async (newName) => {
+    try {
+      const current = await UserProgress.getProgress();
+      if (!current) return null;
+      const updated = { ...current, userName: newName };
+      await UserProgress.saveProgress(updated);
+      setProgress(updated);
+      return updated;
+    } catch (error) {
+      console.error('Error updating user name:', error);
+      return null;
+    }
+  };
+
   return (
     <UserProgressContext.Provider
       value={{
@@ -78,7 +93,8 @@ export const UserProgressProvider = ({ children }) => {
         updateUserProgress,
         setUserLevel,
         updateAccessibilitySettings,
-        resetUserProgress
+        resetUserProgress,
+        updateUserName
       }}
     >
       {children}

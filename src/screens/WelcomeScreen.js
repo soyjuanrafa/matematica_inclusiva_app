@@ -77,6 +77,16 @@ const WelcomeScreen = () => {
   
   return (
     <View style={styles.container}>
+      <View style={styles.topHeader}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+          accessibilityLabel="Volver"
+        >
+          <Ionicons name="arrow-back" size={24} color="#333" />
+        </TouchableOpacity>
+        <Text style={styles.topHeaderTitle}>Bienvenido</Text>
+      </View>
       <View style={styles.content}>
         <Animated.View 
           style={[
@@ -149,6 +159,22 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#f5f5f5',
     justifyContent: 'space-between',
+  },
+  topHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 15,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  backButton: {
+    padding: 5,
+  },
+  topHeaderTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginLeft: 15,
   },
   content: {
     flex: 1,

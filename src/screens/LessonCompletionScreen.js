@@ -6,7 +6,8 @@ import {
   Image,
   ScrollView,
   Animated,
-  Easing
+  Easing,
+  TouchableOpacity
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -67,8 +68,15 @@ const LessonCompletionScreen = () => {
   
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Lección Completada - Cuenta Conmigo</Text>
+      <View style={styles.topHeader}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+          accessibilityLabel="Volver"
+        >
+          <Ionicons name="arrow-back" size={24} color="#333" />
+        </TouchableOpacity>
+        <Text style={styles.topHeaderTitle}>Lección Completada</Text>
       </View>
       
       <View style={styles.content}>
@@ -164,6 +172,22 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+  },
+  topHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 15,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  backButton: {
+    padding: 5,
+  },
+  topHeaderTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginLeft: 15,
   },
   header: {
     paddingTop: 50,

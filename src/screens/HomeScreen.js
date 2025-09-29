@@ -25,18 +25,18 @@ const HomeScreen = () => {
       </View>
       
       <View style={styles.statsContainer}>
-        <View style={styles.statItem}>
+        <TouchableOpacity style={styles.statItem} onPress={() => navigation.navigate('Profile')}>
           <Text style={styles.statValue}>{progress?.level || 1}</Text>
           <Text style={styles.statLabel}>Nivel</Text>
-        </View>
-        <View style={styles.statItem}>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.statItem} onPress={() => navigation.navigate('Rewards')}>
           <Text style={styles.statValue}>{progress?.points || 0}</Text>
           <Text style={styles.statLabel}>Puntos</Text>
-        </View>
-        <View style={styles.statItem}>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.statItem} onPress={() => navigation.navigate('Lessons')}>
           <Text style={styles.statValue}>{progress?.lessonsCompleted || 0}</Text>
           <Text style={styles.statLabel}>Lecciones</Text>
-        </View>
+        </TouchableOpacity>
       </View>
       
       <View style={styles.section}>

@@ -89,6 +89,16 @@ const LessonSelectionScreen = () => {
 
   return (
     <View style={styles.container}>
+      <View style={styles.topHeader}>
+        <TouchableOpacity
+          style={styles.backButton}
+          onPress={() => navigation.goBack()}
+          accessibilityLabel="Volver"
+        >
+          <Ionicons name="arrow-back" size={24} color="#333" />
+        </TouchableOpacity>
+        <Text style={styles.topHeaderTitle}>Seleccionar Lección</Text>
+      </View>
       <View style={[styles.header, { backgroundColor: character?.color || '#6200EE' }]}>
         <View style={styles.headerTop}>
           <View style={styles.headerLeft}>
@@ -177,6 +187,22 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
+  },
+  topHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 15,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  backButton: {
+    padding: 5,
+  },
+  topHeaderTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginLeft: 15,
   },
   loadingContainer: {
     flex: 1,

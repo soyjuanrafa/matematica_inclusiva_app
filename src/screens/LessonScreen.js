@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -13,9 +13,12 @@ import {
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import * as HapticFeedback from 'expo-haptics';
 import { useUserProgress } from '../context/UserProgressContext';
 import { useCharacter } from '../context/CharacterContext';
 import AccessibleButton from '../components/AccessibleButton';
+import NumericInputExercise from '../components/NumericInputExercise';
+import DragDropExercise from '../components/DragDropExercise';
 import { SoundService } from '../utils/soundService';
 import * as Speech from 'expo-speech';
 
@@ -26,6 +29,7 @@ const LessonScreen = () => {
   const { updateUserProgress, accessibilitySettings } = useUserProgress();
   const { selected: character } = useCharacter();
   const waveAnim = new Animated.Value(0);
+  const feedbackAnim = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     // simple infinite horizontal wave animation
@@ -45,6 +49,9 @@ const LessonScreen = () => {
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [isAnswerCorrect, setIsAnswerCorrect] = useState(null);
   const [lesson, setLesson] = useState(null);
+  const [startTime, setStartTime] = useState(null);
+  const [errors, setErrors] = useState({});
+  const [questionStartTime, setQuestionStartTime] = useState(null);
   
   useEffect(() => {
     loadLesson();
@@ -67,6 +74,7 @@ const LessonScreen = () => {
           questions: [
             {
               id: 1,
+              type: 'multiple',
               question: '2 + 4 × 8 = ...',
               options: [44, 39, 36, 48, 34],
               correctAnswerValue: 34,
@@ -74,20 +82,24 @@ const LessonScreen = () => {
             },
             {
               id: 2,
-              question: '¿Cuál es el resultado de 5 × (2 + 3)?',
-              options: [25, 15, 10, 20],
+              type: 'numeric',
+              question: '¿Cuánto es 5 × (2 + 3)?',
               correctAnswerValue: 25,
               explanation: 'Se calcula el paréntesis: 2 + 3 = 5. Luego 5 × 5 = 25.'
             },
             {
               id: 3,
-              question: 'Completa: ? × 7 = 42',
-              options: [5, 6, 7, 8],
-              correctAnswerValue: 6,
-              explanation: '6 × 7 = 42, por tanto ? = 6.'
+              type: 'dragdrop',
+              question: 'Arrastra el número correcto al resultado de 6 × 7',
+              draggables: [{ label: '42' }, { label: '36' }, { label: '48' }],
+              dropZones: [{ label: 'Resultado' }],
+              correctMappings: [{ zoneY: 200, value: 42 }],
+              correctAnswerValue: 42,
+              explanation: '6 × 7 = 42.'
             },
             {
               id: 4,
+              type: 'multiple',
               question: '¿Cuál es mayor?',
               options: [7, 8, 9, 10],
               correctAnswerValue: 10,
@@ -95,8 +107,8 @@ const LessonScreen = () => {
             },
             {
               id: 5,
+              type: 'numeric',
               question: 'Si tienes 3 bolsas con 4 manzanas cada una, ¿cuántas manzanas en total?',
-              options: [7, 12, 9, 15],
               correctAnswerValue: 12,
               explanation: '3 × 4 = 12 manzanas en total.'
             }
@@ -105,6 +117,8 @@ const LessonScreen = () => {
 
         setLesson(lessonData);
         setLoading(false);
+        setStartTime(Date.now());
+        setQuestionStartTime(Date.now());
 
         if (accessibilitySettings?.textToSpeech) {
           Speech.speak(lessonData.questions[0].question, { language: 'es' });
@@ -149,6 +163,15 @@ const LessonScreen = () => {
 
     setIsAnswerCorrect(isCorrect);
 
+    // Haptic feedback
+    HapticFeedback.impactAsync(HapticFeedback.ImpactFeedbackStyle.Medium);
+
+    // Animation for feedback
+    Animated.sequence([
+      Animated.spring(feedbackAnim, { toValue: isCorrect ? 1.1 : 0.9, friction: 3, useNativeDriver: true }),
+      Animated.spring(feedbackAnim, { toValue: 1, friction: 3, useNativeDriver: true })
+    ]).start();
+
     // Reproducir sonido según la respuesta
     try {
       if (isCorrect) SoundService.playSound('correct');
@@ -157,6 +180,38 @@ const LessonScreen = () => {
 
     // Actualizar puntuación (binary)
     if (isCorrect) setScore(s => s + 1);
+
+    // Track errors
+    if (!isCorrect) {
+      setErrors(prev => ({
+        ...prev,
+        [currentQ.id]: (prev[currentQ.id] || 0) + 1
+      }));
+    }
+  };
+
+  const handleExerciseSubmit = (result) => {
+    setIsAnswerCorrect(result.isCorrect);
+
+    // Haptic feedback
+    HapticFeedback.impactAsync(HapticFeedback.ImpactFeedbackStyle.Medium);
+
+    // Reproducir sonido según la respuesta
+    try {
+      if (result.isCorrect) SoundService.playSound('correct');
+      else SoundService.playSound('incorrect');
+    } catch (e) {}
+
+    // Actualizar puntuación (binary)
+    if (result.isCorrect) setScore(s => s + 1);
+
+    // Track errors
+    if (!result.isCorrect) {
+      setErrors(prev => ({
+        ...prev,
+        [lesson.questions[currentQuestion].id]: (prev[lesson.questions[currentQuestion].id] || 0) + 1
+      }));
+    }
   };
   
   const handleNextQuestion = () => {
@@ -164,6 +219,7 @@ const LessonScreen = () => {
       setCurrentQuestion(currentQuestion + 1);
       setSelectedAnswer(null);
       setIsAnswerCorrect(null);
+      setQuestionStartTime(Date.now());
       
       // Leer la siguiente pregunta si el texto a voz está activado
       if (accessibilitySettings?.textToSpeech) {
@@ -174,8 +230,9 @@ const LessonScreen = () => {
       // Lección completada
       const totalQuestions = lesson.questions.length;
       const finalScore = score + (isAnswerCorrect ? 1 : 0);
+      const timeSpent = Math.floor((Date.now() - startTime) / 1000);
 
-      updateUserProgress(lessonId, finalScore);
+      updateUserProgress(lessonId, finalScore, timeSpent, errors);
 
       navigation.navigate('LessonCompletion', {
         score: finalScore,
@@ -200,65 +257,77 @@ const LessonScreen = () => {
   
   return (
     <View style={styles.container}>
-  <View style={styles.header}>
-        <TouchableOpacity 
+      <View style={styles.topHeader}>
+        <TouchableOpacity
           style={styles.backButton}
           onPress={() => navigation.goBack()}
           accessibilityLabel="Volver a la selección de lecciones"
         >
-          <Ionicons name="arrow-back" size={24} color="white" />
+          <Ionicons name="arrow-back" size={24} color="#333" />
         </TouchableOpacity>
-        <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
-          {renderAvatar(character, 48)}
-          <View style={{ flex: 1 }}>
-            <Text style={styles.headerTitle}>{lesson.title}</Text>
-            <Text style={{ color: 'white', fontSize: 12 }}>{lesson.character}</Text>
-          </View>
-        </View>
+        <Text style={styles.topHeaderTitle}>{lesson.title}</Text>
         <View style={styles.progressIndicator}>
           <Text style={styles.progressText}>
             {currentQuestion + 1}/{lesson.questions.length}
           </Text>
         </View>
-  </View>
-  <WaveBackground color={character?.color || '#E3F2FD'} />
+      </View>
+      <WaveBackground color={character?.color || '#E3F2FD'} />
       
       <ScrollView style={styles.content}>
         <View style={styles.questionContainer}>
           <Text style={styles.questionText}>{currentQ.question}</Text>
         </View>
         
-        <View style={styles.optionsContainer}>
-          {currentQ.options.map((option, index) => (
-            <TouchableOpacity
-              key={index}
-              style={[
-                styles.optionButton,
-                selectedAnswer === index && styles.selectedOption,
-                selectedAnswer === index && isAnswerCorrect && styles.correctOption,
-                selectedAnswer === index && !isAnswerCorrect && styles.incorrectOption,
-                selectedAnswer !== null && currentQ.correctAnswerValue === option && styles.correctOption
-              ]}
-              onPress={() => selectedAnswer === null && handleAnswerSelect(index)}
-              disabled={selectedAnswer !== null}
-              accessibilityLabel={`Opción ${index + 1}: ${option}`}
-              accessibilityHint="Toca para seleccionar esta respuesta"
-            >
-              <Text style={[
-                styles.optionText,
-                selectedAnswer === index && styles.selectedOptionText,
-                selectedAnswer === index && isAnswerCorrect && styles.correctOptionText,
-                selectedAnswer === index && !isAnswerCorrect && styles.incorrectOptionText,
-                selectedAnswer !== null && currentQ.correctAnswerValue === option && styles.correctOptionText
-              ]}>
-                {option}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+        {currentQ.type === 'multiple' && (
+          <View style={styles.optionsContainer}>
+            {currentQ.options.map((option, index) => (
+              <TouchableOpacity
+                key={index}
+                style={[
+                  styles.optionButton,
+                  selectedAnswer === index && styles.selectedOption,
+                  selectedAnswer === index && isAnswerCorrect && styles.correctOption,
+                  selectedAnswer === index && !isAnswerCorrect && styles.incorrectOption,
+                  selectedAnswer !== null && currentQ.correctAnswerValue === option && styles.correctOption
+                ]}
+                onPress={() => selectedAnswer === null && handleAnswerSelect(index)}
+                disabled={selectedAnswer !== null}
+                accessibilityLabel={`Opción ${index + 1}: ${option}`}
+                accessibilityHint="Toca para seleccionar esta respuesta"
+              >
+                <Text style={[
+                  styles.optionText,
+                  selectedAnswer === index && styles.selectedOptionText,
+                  selectedAnswer === index && isAnswerCorrect && styles.correctOptionText,
+                  selectedAnswer === index && !isAnswerCorrect && styles.incorrectOptionText,
+                  selectedAnswer !== null && currentQ.correctAnswerValue === option && styles.correctOptionText
+                ]}>
+                  {option}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+
+        {currentQ.type === 'numeric' && (
+          <NumericInputExercise
+            question={currentQ}
+            onSubmit={handleExerciseSubmit}
+            accessibilitySettings={accessibilitySettings}
+          />
+        )}
+
+        {currentQ.type === 'dragdrop' && (
+          <DragDropExercise
+            question={currentQ}
+            onSubmit={handleExerciseSubmit}
+            accessibilitySettings={accessibilitySettings}
+          />
+        )}
         
-        {selectedAnswer !== null && (
-          <View style={styles.feedbackContainer}>
+        {(selectedAnswer !== null || isAnswerCorrect !== null) && (
+          <Animated.View style={[styles.feedbackContainer, { transform: [{ scale: feedbackAnim }] }]}>
             <Text style={[
               styles.feedbackText,
               isAnswerCorrect ? styles.correctFeedbackText : styles.incorrectFeedbackText
@@ -268,11 +337,11 @@ const LessonScreen = () => {
             <Text style={styles.explanationText}>
               {currentQ.explanation}
             </Text>
-          </View>
+          </Animated.View>
         )}
       </ScrollView>
       
-      {selectedAnswer !== null && (
+      {(selectedAnswer !== null || isAnswerCorrect !== null) && (
         <View style={styles.footer}>
           <AccessibleButton
             title={currentQuestion < lesson.questions.length - 1 ? "Siguiente" : "Finalizar"}
@@ -302,13 +371,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#666',
   },
-  header: {
+  topHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingTop: 50,
-    paddingBottom: 15,
-    paddingHorizontal: 20,
-    backgroundColor: '#6200EE',
+    padding: 15,
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  topHeaderTitle: {
+    flex: 1,
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginLeft: 15,
   },
   waveContainer: {
     ...StyleSheet.absoluteFillObject,
@@ -327,15 +402,9 @@ const styles = StyleSheet.create({
   backButton: {
     padding: 5,
   },
-  headerTitle: {
-    flex: 1,
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: 'white',
-    marginLeft: 15,
-  },
+
   progressIndicator: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    backgroundColor: '#6200EE',
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderRadius: 15,
