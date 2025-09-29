@@ -7,7 +7,7 @@ import {
 } from 'react-native';
 import { useUserProgress } from '../context/UserProgressContext';
 import { SoundService } from '../utils/soundService';
-import * as Speech from 'expo-speech';
+import { SpeechService } from '../utils/speechService';
 
 const AccessibleButton = ({
   title,
@@ -22,11 +22,11 @@ const AccessibleButton = ({
   disabled = false
 }) => {
   const { accessibilitySettings } = useUserProgress();
-  
+
   const handlePress = () => {
     // Proporcionar feedback auditivo con sonido
     SoundService.playSound('button', 0.7);
-    
+
     // Proporcionar feedback táctil si está disponible
     if (accessibilitySettings?.vibration) {
       Vibration.vibrate(vibrationPattern);
@@ -35,7 +35,7 @@ const AccessibleButton = ({
     // Proporcionar feedback auditivo si está habilitado
     if (accessibilitySettings?.textToSpeech && soundFeedback) {
       const textToSpeak = accessibilityLabel || title;
-      Speech.speak(textToSpeak, {
+      SpeechService.speak(textToSpeak, {
         language: 'es',
         pitch: 1.0,
         rate: 0.8

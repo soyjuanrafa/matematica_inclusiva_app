@@ -9,39 +9,39 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useUserProgress } from '../context/UserProgressContext';
-import * as Speech from 'expo-speech';
+import { SpeechService } from '../utils/speechService';
 
-const LessonCard = ({ 
-  lesson, 
+const LessonCard = ({
+  lesson,
   onPress,
   style,
   accessibilityLabel,
 }) => {
   const navigation = useNavigation();
   const { accessibilitySettings } = useUserProgress();
-  
+
   const handlePress = () => {
     // Proporcionar feedback auditivo si está habilitado
     if (accessibilitySettings?.textToSpeech) {
       const textToSpeak = `Lección: ${lesson.title}. ${lesson.description}`;
-      Speech.speak(textToSpeak, {
+      SpeechService.speak(textToSpeak, {
         language: 'es',
         pitch: 1.0,
         rate: 0.8
       });
     }
-    
+
     if (onPress) {
       onPress(lesson);
     } else {
       navigation.navigate('Lesson', { lessonId: lesson.id });
     }
   };
-  
+
   // Determinar el tamaño de fuente basado en la configuración de accesibilidad
   const getFontSize = (baseSize) => {
     if (!accessibilitySettings) return baseSize;
-    
+
     switch (accessibilitySettings.fontSize) {
       case 'small': return baseSize - 2;
       case 'large': return baseSize + 2;
@@ -49,7 +49,7 @@ const LessonCard = ({
       default: return baseSize; // medium
     }
   };
-  
+
   // Aplicar alto contraste si está habilitado
   const getColors = () => {
     if (accessibilitySettings?.highContrast) {
@@ -65,14 +65,14 @@ const LessonCard = ({
       border: lesson.borderColor || '#EEEEEE'
     };
   };
-  
+
   const colors = getColors();
-  
+
   return (
     <TouchableOpacity
       style={[
         styles.card,
-        { 
+        {
           backgroundColor: colors.background,
           borderColor: colors.border
         },
@@ -84,18 +84,18 @@ const LessonCard = ({
       accessible={true}
     >
       {lesson.image && (
-        <Image 
-          source={lesson.image} 
+        <Image
+          source={lesson.image}
           style={styles.image}
           accessibilityLabel={`Imagen para ${lesson.title}`}
         />
       )}
-      
+
       <View style={styles.content}>
-        <Text 
+        <Text
           style={[
-            styles.title, 
-            { 
+            styles.title,
+            {
               color: colors.text,
               fontSize: getFontSize(16)
             }
@@ -103,11 +103,11 @@ const LessonCard = ({
         >
           {lesson.title}
         </Text>
-        
-        <Text 
+
+        <Text
           style={[
-            styles.description, 
-            { 
+            styles.description,
+            {
               color: colors.text,
               fontSize: getFontSize(14)
             }
@@ -115,15 +115,15 @@ const LessonCard = ({
         >
           {lesson.description}
         </Text>
-        
+
         {lesson.progress !== undefined && (
           <View style={styles.progressContainer}>
             <View style={styles.progressBar}>
-              <View 
+              <View
                 style={[
-                  styles.progressFill, 
+                  styles.progressFill,
                   { width: `${lesson.progress}%` }
-                ]} 
+                ]}
               />
             </View>
             <Text style={styles.progressText}>

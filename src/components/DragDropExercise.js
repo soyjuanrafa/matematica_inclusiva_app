@@ -8,7 +8,7 @@ import {
   Dimensions,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import * as HapticFeedback from 'expo-haptics';
+import { HapticService } from '../utils/hapticService';
 import { SoundService } from '../utils/soundService';
 
 const { width } = Dimensions.get('window');
@@ -25,7 +25,7 @@ const DragDropExercise = ({ question, onSubmit, accessibilitySettings }) => {
       onStartShouldSetPanResponder: () => true,
       onPanResponderGrant: (evt, gestureState) => {
         setDraggedItem(gestureState.y0); // Store starting Y for drop zone detection
-        HapticFeedback.impactAsync(HapticFeedback.ImpactFeedbackStyle.Light);
+        HapticService.impactAsync();
       },
       onPanResponderMove: Animated.event([null, { dx: pan.x, dy: pan.y }], {
         useNativeDriver: false,
@@ -41,7 +41,7 @@ const DragDropExercise = ({ question, onSubmit, accessibilitySettings }) => {
           // Correct drop
           setIsCorrect(true);
           SoundService.playSound('correct');
-          HapticFeedback.impactAsync(HapticFeedback.ImpactFeedbackStyle.Medium);
+          HapticService.impactAsync();
           onSubmit({
             isCorrect: true,
             userAnswer: correctZone.value,
@@ -51,7 +51,7 @@ const DragDropExercise = ({ question, onSubmit, accessibilitySettings }) => {
           // Incorrect drop
           setIsCorrect(false);
           SoundService.playSound('incorrect');
-          HapticFeedback.impactAsync(HapticFeedback.ImpactFeedbackStyle.Medium);
+          HapticService.impactAsync();
           onSubmit({
             isCorrect: false,
             userAnswer: null,

@@ -8,7 +8,7 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import * as HapticFeedback from 'expo-haptics';
+import { HapticService } from '../utils/hapticService';
 import { SoundService } from '../utils/soundService';
 
 const NumericInputExercise = ({ question, onSubmit, accessibilitySettings }) => {
@@ -23,7 +23,7 @@ const NumericInputExercise = ({ question, onSubmit, accessibilitySettings }) => 
 
     setIsCorrect(correct);
     setSubmitted(true);
-    HapticFeedback.impactAsync(HapticFeedback.ImpactFeedbackStyle.Medium);
+    HapticService.impactAsync();
 
     if (correct) {
       SoundService.playSound('correct');

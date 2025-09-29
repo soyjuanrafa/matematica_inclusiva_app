@@ -1,10 +1,18 @@
 import { Audio } from 'expo-av';
+import { Platform } from 'react-native';
 
 export const SoundService = {
   sounds: {},
 
   async loadSounds() {
     try {
+      // Skip sound loading on web
+      if (Platform.OS === 'web') {
+        console.debug('SoundService: Skipping sound loading on web platform');
+        this.sounds = {};
+        return true;
+      }
+
       // If we've already loaded sounds, skip reloading
       if (this.sounds && Object.keys(this.sounds).length > 0) {
         console.debug('Sounds already loaded, skipping reload');
@@ -15,7 +23,7 @@ export const SoundService = {
         try {
           await soundInstance.loadAsync(assetRequire);
           return soundInstance;
-          } catch (err) {
+        } catch (err) {
           console.debug('Could not load sound asset (ignored):', err.message || err);
           return null;
         }
@@ -48,7 +56,7 @@ export const SoundService = {
       if (loadedButton) this.sounds.button = loadedButton;
       if (loadedAchievement) this.sounds.achievement = loadedAchievement;
 
-  console.debug('SoundService: loaded sounds:', Object.keys(this.sounds));
+      console.debug('SoundService: loaded sounds:', Object.keys(this.sounds));
       return true;
     } catch (error) {
       console.error('Error loading sounds:', error);
@@ -59,6 +67,12 @@ export const SoundService = {
 
   async playSound(soundName, volume = 1.0) {
     try {
+      // Skip sound playback on web
+      if (Platform.OS === 'web') {
+        console.debug(`SoundService: Skipping sound playback on web platform for ${soundName}`);
+        return;
+      }
+
       const sound = this.sounds[soundName];
       if (!sound) {
         console.debug(`Sound ${soundName} not found or not loaded`);
@@ -81,6 +95,13 @@ export const SoundService = {
 
   async unloadSounds() {
     try {
+      // Skip unloading on web
+      if (Platform.OS === 'web') {
+        console.debug('SoundService: Skipping sound unloading on web platform');
+        this.sounds = {};
+        return;
+      }
+
       for (const sound of Object.values(this.sounds)) {
         if (sound) {
           try {
@@ -94,7 +115,7 @@ export const SoundService = {
         }
       }
       this.sounds = {};
-  console.debug('Sounds unloaded successfully');
+      console.debug('Sounds unloaded successfully');
     } catch (error) {
       console.error('Error unloading sounds:', error);
     }

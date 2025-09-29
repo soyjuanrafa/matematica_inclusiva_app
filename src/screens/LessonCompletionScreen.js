@@ -14,25 +14,25 @@ import { Ionicons } from '@expo/vector-icons';
 import { useUserProgress } from '../context/UserProgressContext';
 import AccessibleButton from '../components/AccessibleButton';
 import { SoundService } from '../utils/soundService';
-import * as Speech from 'expo-speech';
+import { SpeechService } from '../utils/speechService';
 
 const LessonCompletionScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const { score, totalQuestions, lessonId } = route.params || {};
   const { progress, accessibilitySettings } = useUserProgress();
-  
+
   const scorePercentage = Math.round((score / totalQuestions) * 100);
   const isPerfectScore = score === totalQuestions;
-  
+
   // Animation values
   const scaleAnim = new Animated.Value(0.5);
   const opacityAnim = new Animated.Value(0);
-  
+
   useEffect(() => {
     // Play achievement sound
     SoundService.playSound('achievement');
-    
+
     // Start animations
     Animated.parallel([
       Animated.timing(scaleAnim, {
@@ -47,25 +47,25 @@ const LessonCompletionScreen = () => {
         useNativeDriver: true
       })
     ]).start();
-    
+
     // Text to speech feedback if enabled
     if (accessibilitySettings?.textToSpeech) {
-      const message = isPerfectScore 
-        ? '¡Felicidades! Has completado la lección con una puntuación perfecta.' 
+      const message = isPerfectScore
+        ? '¡Felicidades! Has completado la lección con una puntuación perfecta.'
         : `Has completado la lección con ${score} de ${totalQuestions} respuestas correctas.`;
-      
-      Speech.speak(message, { language: 'es' });
+
+      SpeechService.speak(message, { language: 'es' });
     }
   }, []);
-  
+
   const handleContinue = () => {
     navigation.navigate('Lessons');
   };
-  
+
   const handleRetry = () => {
     navigation.navigate('Lesson', { lessonId });
   };
-  
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.topHeader}>
@@ -78,56 +78,56 @@ const LessonCompletionScreen = () => {
         </TouchableOpacity>
         <Text style={styles.topHeaderTitle}>Lección Completada</Text>
       </View>
-      
+
       <View style={styles.content}>
-        <Animated.View 
+        <Animated.View
           style={[
             styles.resultContainer,
-            { 
+            {
               transform: [{ scale: scaleAnim }],
               opacity: opacityAnim
             }
           ]}
         >
-          <Image 
-            source={isPerfectScore 
-              ? require('../../assets/medal.png') 
+          <Image
+            source={isPerfectScore
+              ? require('../../assets/medal.png')
               : require('../../assets/character-square.png')
-            } 
+            }
             style={styles.resultImage}
             accessibilityLabel={isPerfectScore ? "Medalla de oro" : "Personaje"}
           />
-          
+
           <Text style={styles.scoreText}>
             {score}/{totalQuestions}
           </Text>
-          
+
           <Text style={styles.percentageText}>
             {scorePercentage}%
           </Text>
-          
+
           <Text style={styles.feedbackText}>
-            {isPerfectScore 
-              ? '¡Excelente trabajo!' 
-              : scorePercentage >= 70 
-                ? '¡Buen trabajo!' 
+            {isPerfectScore
+              ? '¡Excelente trabajo!'
+              : scorePercentage >= 70
+                ? '¡Buen trabajo!'
                 : 'Sigue practicando'
             }
           </Text>
-          
+
           <View style={styles.statsContainer}>
             <View style={styles.statItem}>
               <Ionicons name="star" size={24} color="#FFC107" />
               <Text style={styles.statValue}>{score * 10}</Text>
               <Text style={styles.statLabel}>Puntos</Text>
             </View>
-            
+
             <View style={styles.statItem}>
               <Ionicons name="trophy" size={24} color="#6200EE" />
               <Text style={styles.statValue}>+1</Text>
               <Text style={styles.statLabel}>Lección</Text>
             </View>
-            
+
             <View style={styles.statItem}>
               <Ionicons name="trending-up" size={24} color="#4CAF50" />
               <Text style={styles.statValue}>{progress?.level || 1}</Text>
@@ -135,7 +135,7 @@ const LessonCompletionScreen = () => {
             </View>
           </View>
         </Animated.View>
-        
+
         {isPerfectScore && (
           <View style={styles.achievementContainer}>
             <Ionicons name="ribbon" size={30} color="#FFC107" />
@@ -144,7 +144,7 @@ const LessonCompletionScreen = () => {
             </Text>
           </View>
         )}
-        
+
         <View style={styles.buttonsContainer}>
           <AccessibleButton
             title="Continuar"
@@ -152,7 +152,7 @@ const LessonCompletionScreen = () => {
             style={styles.continueButton}
             accessibilityLabel="Continuar a la selección de lecciones"
           />
-          
+
           {!isPerfectScore && (
             <AccessibleButton
               title="Reintentar"

@@ -13,14 +13,14 @@ import {
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import * as HapticFeedback from 'expo-haptics';
 import { useUserProgress } from '../context/UserProgressContext';
 import { useCharacter } from '../context/CharacterContext';
 import AccessibleButton from '../components/AccessibleButton';
 import NumericInputExercise from '../components/NumericInputExercise';
 import DragDropExercise from '../components/DragDropExercise';
 import { SoundService } from '../utils/soundService';
-import * as Speech from 'expo-speech';
+import { SpeechService } from '../utils/speechService';
+import { HapticService } from '../utils/hapticService';
 
 const LessonScreen = () => {
   const navigation = useNavigation();
@@ -42,7 +42,7 @@ const LessonScreen = () => {
       })
     ).start();
   }, []);
-  
+
   const [loading, setLoading] = useState(true);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
@@ -52,67 +52,98 @@ const LessonScreen = () => {
   const [startTime, setStartTime] = useState(null);
   const [errors, setErrors] = useState({});
   const [questionStartTime, setQuestionStartTime] = useState(null);
-  
+
   useEffect(() => {
     loadLesson();
   }, [lessonId]);
-  
+
   const loadLesson = async () => {
     try {
       // Aquí cargarías los datos de la lección desde una API o base de datos
-      // Por ahora usamos datos de ejemplo
-      
+      // Por ahora usamos datos de ejemplo generados dinámicamente para variedad
+
       // Simular carga de datos usando el modelo proporcionado
       setTimeout(() => {
+        // Generar preguntas aleatorias para variedad
+        const numQuestions = 5;
+        const questions = [];
+        const operations = ['+', '-', '×', '÷'];
+        const types = ['multiple', 'numeric', 'dragdrop'];
+
+        for (let i = 1; i <= numQuestions; i++) {
+          const type = types[Math.floor(Math.random() * types.length)];
+          let questionData = {};
+
+          if (type === 'multiple') {
+            const a = Math.floor(Math.random() * 10) + 1;
+            const b = Math.floor(Math.random() * 10) + 1;
+            const op = operations[Math.floor(Math.random() * operations.length)];
+            const correct = op === '+' ? a + b : op === '-' ? a - b : op === '×' ? a * b : Math.floor(a / b);
+            const questionText = `${a} ${op} ${b} = ...`;
+            const options = [correct];
+            while (options.length < 5) {
+              const wrong = correct + (Math.random() > 0.5 ? 1 : -1) * (Math.floor(Math.random() * 5) + 1);
+              if (!options.includes(wrong)) options.push(wrong);
+            }
+            options.sort(() => Math.random() - 0.5);
+
+            questionData = {
+              id: i,
+              type,
+              question: questionText,
+              options,
+              correctAnswerValue: correct,
+              explanation: `La operación ${a} ${op} ${b} da como resultado ${correct}.`
+            };
+          } else if (type === 'numeric') {
+            const a = Math.floor(Math.random() * 10) + 1;
+            const b = Math.floor(Math.random() * 10) + 1;
+            const op = operations[Math.floor(Math.random() * operations.length)];
+            const correct = op === '+' ? a + b : op === '-' ? a - b : op === '×' ? a * b : Math.floor(a / b);
+            const questionText = `¿Cuánto es ${a} ${op} ${b}?`;
+
+            questionData = {
+              id: i,
+              type,
+              question: questionText,
+              correctAnswerValue: correct,
+              explanation: `La operación ${a} ${op} ${b} da como resultado ${correct}.`
+            };
+          } else if (type === 'dragdrop') {
+            const a = Math.floor(Math.random() * 10) + 1;
+            const b = Math.floor(Math.random() * 10) + 1;
+            const op = '×';
+            const correct = a * b;
+            const draggables = [
+              { label: correct.toString() },
+              { label: (correct - 2).toString() },
+              { label: (correct + 2).toString() }
+            ].sort(() => Math.random() - 0.5);
+            const dropZones = [{ label: 'Resultado de la operación' }];
+            const correctMappings = [{ zoneY: 200, value: correct }]; // Asumiendo zona Y fija para simplicidad
+
+            questionData = {
+              id: i,
+              type,
+              question: `Arrastra el resultado correcto de ${a} ${op} ${b}`,
+              draggables,
+              dropZones,
+              correctMappings,
+              correctAnswerValue: correct,
+              explanation: `${a} ${op} ${b} = ${correct}.`
+            };
+          }
+
+          questions.push(questionData);
+        }
+
         const lessonData = {
           id: lessonId,
           title: 'La Montaña de las Operaciones',
-          description: 'Sube la montaña resolviendo operaciones',
+          description: 'Sube la montaña resolviendo operaciones matemáticas variadas',
           character: character?.displayName ? `${character.displayName} (${character.name})` : 'Roko (Cuadrado morado, gorra naranja)',
           background: 'Olas con cuerda animada',
-          // Multiple varied questions for variety
-          questions: [
-            {
-              id: 1,
-              type: 'multiple',
-              question: '2 + 4 × 8 = ...',
-              options: [44, 39, 36, 48, 34],
-              correctAnswerValue: 34,
-              explanation: 'Se realiza primero la multiplicación: 4 × 8 = 32. Luego 2 + 32 = 34.'
-            },
-            {
-              id: 2,
-              type: 'numeric',
-              question: '¿Cuánto es 5 × (2 + 3)?',
-              correctAnswerValue: 25,
-              explanation: 'Se calcula el paréntesis: 2 + 3 = 5. Luego 5 × 5 = 25.'
-            },
-            {
-              id: 3,
-              type: 'dragdrop',
-              question: 'Arrastra el número correcto al resultado de 6 × 7',
-              draggables: [{ label: '42' }, { label: '36' }, { label: '48' }],
-              dropZones: [{ label: 'Resultado' }],
-              correctMappings: [{ zoneY: 200, value: 42 }],
-              correctAnswerValue: 42,
-              explanation: '6 × 7 = 42.'
-            },
-            {
-              id: 4,
-              type: 'multiple',
-              question: '¿Cuál es mayor?',
-              options: [7, 8, 9, 10],
-              correctAnswerValue: 10,
-              explanation: '3+4=7; 2*4=8; 9; 10 → mayor es 10.'
-            },
-            {
-              id: 5,
-              type: 'numeric',
-              question: 'Si tienes 3 bolsas con 4 manzanas cada una, ¿cuántas manzanas en total?',
-              correctAnswerValue: 12,
-              explanation: '3 × 4 = 12 manzanas en total.'
-            }
-          ]
+          questions
         };
 
         setLesson(lessonData);
@@ -121,7 +152,7 @@ const LessonScreen = () => {
         setQuestionStartTime(Date.now());
 
         if (accessibilitySettings?.textToSpeech) {
-          Speech.speak(lessonData.questions[0].question, { language: 'es' });
+          SpeechService.speak(lessonData.questions[0].question, { language: 'es' });
         }
       }, 600);
     } catch (error) {
@@ -154,7 +185,7 @@ const LessonScreen = () => {
       </View>
     );
   };
-  
+
   const handleAnswerSelect = (answerIndex) => {
     setSelectedAnswer(answerIndex);
     const currentQ = lesson.questions[currentQuestion];
@@ -164,7 +195,7 @@ const LessonScreen = () => {
     setIsAnswerCorrect(isCorrect);
 
     // Haptic feedback
-    HapticFeedback.impactAsync(HapticFeedback.ImpactFeedbackStyle.Medium);
+    HapticService.impactAsync();
 
     // Animation for feedback
     Animated.sequence([
@@ -194,7 +225,7 @@ const LessonScreen = () => {
     setIsAnswerCorrect(result.isCorrect);
 
     // Haptic feedback
-    HapticFeedback.impactAsync(HapticFeedback.ImpactFeedbackStyle.Medium);
+    HapticService.impactAsync();
 
     // Reproducir sonido según la respuesta
     try {
@@ -213,18 +244,18 @@ const LessonScreen = () => {
       }));
     }
   };
-  
+
   const handleNextQuestion = () => {
     if (currentQuestion < lesson.questions.length - 1) {
       setCurrentQuestion(currentQuestion + 1);
       setSelectedAnswer(null);
       setIsAnswerCorrect(null);
       setQuestionStartTime(Date.now());
-      
+
       // Leer la siguiente pregunta si el texto a voz está activado
       if (accessibilitySettings?.textToSpeech) {
         const questionText = lesson.questions[currentQuestion + 1].question;
-        Speech.speak(questionText, { language: 'es' });
+        SpeechService.speak(questionText, { language: 'es' });
       }
     } else {
       // Lección completada
@@ -243,7 +274,7 @@ const LessonScreen = () => {
       });
     }
   };
-  
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -252,9 +283,9 @@ const LessonScreen = () => {
       </View>
     );
   }
-  
+
   const currentQ = lesson.questions[currentQuestion];
-  
+
   return (
     <View style={styles.container}>
       <View style={styles.topHeader}>
@@ -273,12 +304,12 @@ const LessonScreen = () => {
         </View>
       </View>
       <WaveBackground color={character?.color || '#E3F2FD'} />
-      
+
       <ScrollView style={styles.content}>
         <View style={styles.questionContainer}>
           <Text style={styles.questionText}>{currentQ.question}</Text>
         </View>
-        
+
         {currentQ.type === 'multiple' && (
           <View style={styles.optionsContainer}>
             {currentQ.options.map((option, index) => (
@@ -325,7 +356,7 @@ const LessonScreen = () => {
             accessibilitySettings={accessibilitySettings}
           />
         )}
-        
+
         {(selectedAnswer !== null || isAnswerCorrect !== null) && (
           <Animated.View style={[styles.feedbackContainer, { transform: [{ scale: feedbackAnim }] }]}>
             <Text style={[
@@ -340,7 +371,7 @@ const LessonScreen = () => {
           </Animated.View>
         )}
       </ScrollView>
-      
+
       {(selectedAnswer !== null || isAnswerCorrect !== null) && (
         <View style={styles.footer}>
           <AccessibleButton
