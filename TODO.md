@@ -12,3 +12,4 @@
 - [x] Run the Node.js app and test endpoints
 - [x] Switch to in-memory MongoDB for development
 - [x] Test registration, login, problem generation, answering, and progress tracking
+- [x] Perform thorough testing of all endpoints (auth, problems, progress)
