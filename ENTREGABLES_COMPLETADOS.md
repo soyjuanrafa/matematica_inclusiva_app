@@ -23,8 +23,7 @@
 
 ### 1. ✅ Definición de Tecnologías Seleccionadas
 
-**Documento**: [`docs/TECNOLOGIAS_SELECCIONADAS.md`](docs/TECNOLOGIAS_SELECCIONADAS.md)  
-**Tamaño**: 12.4 KB  
+**Documento**: [`docs/TECNOLOGIAS_SELECCIONADAS.md`](docs/TECNOLOGIAS_SELECCIONADAS.md)    
 **Estado**: ✅ Completado
 
 **Contenido:**
@@ -70,7 +69,6 @@
 ### 3. ✅ Arquitectura de Software
 
 **Documento**: [`docs/ARQUITECTURA_SOFTWARE.md`](docs/ARQUITECTURA_SOFTWARE.md)  
-**Tamaño**: 22.3 KB  
 **Estado**: ✅ Completado
 
 **Contenido:**
@@ -98,8 +96,7 @@
 
 ### 4. ✅ Diagrama de Base de Datos
 
-**Documento**: [`docs/DIAGRAMA_BASE_DATOS.md`](docs/DIAGRAMA_BASE_DATOS.md)  
-**Tamaño**: 25.8 KB  
+**Documento**: [`docs/DIAGRAMA_BASE_DATOS.md`](docs/DIAGRAMA_BASE_DATOS.md)    
 **Estado**: ✅ Completado
 
 **Contenido:**
@@ -129,8 +126,7 @@
 
 ### 5. ✅ Frontend Inicial
 
-**Documentación**: [`docs/FRONTEND_ESTRUCTURA.md`](docs/FRONTEND_ESTRUCTURA.md)  
-**Tamaño**: 14.5 KB  
+**Documentación**: [`docs/FRONTEND_ESTRUCTURA.md`](docs/FRONTEND_ESTRUCTURA.md)   
 **Estado**: ✅ Completado
 
 **Estructura Implementada:**
@@ -187,8 +183,7 @@ src/
 
 ### 6. ✅ Backend Inicial
 
-**Documentación**: [`backend/README.md`](backend/README.md)  
-**Tamaño**: 8.5 KB  
+**Documentación**: [`backend/README.md`](backend/README.md)    
 **Estado**: ✅ Completado
 
 **Estructura Implementada:**
@@ -262,8 +257,7 @@ backend/
 
 ## 📊 Gestión de Tareas
 
-**Documento**: [`docs/GESTION_TAREAS.md`](docs/GESTION_TAREAS.md)  
-**Tamaño**: 10.5 KB  
+**Documento**: [`docs/GESTION_TAREAS.md`](docs/GESTION_TAREAS.md)   
 **Estado**: ✅ Completado
 
 **Contenido:**
