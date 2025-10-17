@@ -1,5 +1,5 @@
 ﻿import React, { useEffect, useRef } from 'react';
-import { StatusBar, LogBox, View } from 'react-native';
+import { StatusBar, LogBox, View, Text, Platform } from 'react-native';
 import { UserProgressProvider } from './src/context/UserProgressContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import { AuthProvider, useAuth } from './src/context/AuthContext';
@@ -66,9 +66,9 @@ export default function App() {
   const [fredokaLoaded] = useFredoka({ Fredoka_400Regular });
   const [atkinsonLoaded] = useAtkinson({ AtkinsonHyperlegible_400Regular });
   const [poppinsLoaded] = usePoppins({ Poppins_400Regular });
-  const fontsLoaded = fredokaLoaded && atkinsonLoaded && poppinsLoaded;
+  const fontsLoaded = Platform.OS === 'web' ? true : (fredokaLoaded && atkinsonLoaded && poppinsLoaded);
 
-  if (!fontsLoaded) return null;
+  if (!fontsLoaded) return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: COLORS.background }}><Text>Cargando fuentes...</Text></View>;
 
   return (
     <AuthProvider>
@@ -84,10 +84,21 @@ export default function App() {
   );
 }
 
+// Componente principal de la aplicación
 const MainApp = () => {
   const { user, loading } = useAuth();
 
-  if (loading) return null;
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#F5F5F5' }}>
+        <Text>Cargando...</Text>
+      </View>
+    );
+  }
 
-  return user ? <AppNavigator /> : <LoginScreen />;
+  if (!user) {
+    return <LoginScreen />;
+  }
+
+  return <AppNavigator />;
 };
