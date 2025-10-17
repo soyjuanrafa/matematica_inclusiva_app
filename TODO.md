@@ -18,8 +18,8 @@
 - [x] Create RESUMEN_EJECUTIVO.md
 
 ## GitHub Setup
-- [ ] Initialize git repository
-- [ ] Add all files
-- [ ] Commit changes
-- [ ] Create branch "entregables pesados"
-- [ ] Push to GitHub
+- [x] Initialize git repository
+- [x] Add all files
+- [x] Commit changes
+- [x] Create branch "entregables pesados"
+- [x] Push to GitHub
